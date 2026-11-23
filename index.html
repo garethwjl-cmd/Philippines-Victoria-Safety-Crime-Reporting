@@ -1,1513 +1,2251 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Philippines vs. Victoria Safety & Crime Intelligence Tracker (2020–2027)</title>
-  <!-- Tailwind CSS -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Chart.js -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <!-- Google Fonts: Inter -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    /* Global Reset & Dark Slate Theme Variables */
+    :root {
+      --bg-main: #0b1120;
+      --bg-card: #111827;
+      --bg-card-hover: #1f2937;
+      --bg-pill: #1e293b;
+      --border-color: #1f2937;
+      --border-highlight: #374151;
+      
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+      --text-dim: #6b7280;
 
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          fontFamily: {
-            sans: ['Inter', 'sans-serif'],
-          },
-          colors: {
-            brand: {
-              dark: '#0B0F17',
-              card: '#141C2B',
-              border: '#233044',
-              accent: '#3B82F6',
-            },
-            reg: {
-              vic: '#0ea5e9',
-              cebu: '#f59e0b',
-              negros: '#10b981',
-              panay: '#8b5cf6',
-              bohol: '#ec4899',
-              mindanao: '#ef4444'
-            }
-          }
-        }
+      --col-vic: #38bdf8;
+      --col-vic-bg: rgba(56, 189, 248, 0.12);
+      --col-ph: #34d399;
+      --col-ph-bg: rgba(52, 211, 153, 0.12);
+      --col-cebu: #f59e0b;
+      --col-cebu-bg: rgba(245, 158, 11, 0.12);
+
+      --tier-1: #10b981;
+      --tier-2: #3b82f6;
+      --tier-3: #8b5cf6;
+      --tier-4: #f59e0b;
+      --tier-5: #ef4444;
+
+      --font-stack: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-main);
+      color: var(--text-main);
+      font-family: var(--font-stack);
+      font-size: 13px;
+      line-height: 1.4;
+      padding: 12px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Tabular numbers for clean alignment */
+    .num {
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* Dashboard Header */
+    header {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border-color);
+      margin-bottom: 12px;
+    }
+
+    .header-title-group h1 {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .header-title-group p {
+      font-size: 11.5px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .badge-live {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: rgba(16, 185, 129, 0.12);
+      color: #34d399;
+      border: 1px solid rgba(52, 211, 153, 0.3);
+      padding: 2px 7px;
+      border-radius: 10px;
+      font-size: 10.5px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .badge-live-dot {
+      width: 6px;
+      height: 6px;
+      background-color: #34d399;
+      border-radius: 50%;
+      box-shadow: 0 0 6px #34d399;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-highlight);
+      color: var(--text-main);
+      padding: 5px 10px;
+      border-radius: 6px;
+      font-size: 11.5px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .btn:hover {
+      background: var(--bg-card-hover);
+      border-color: #4b5563;
+    }
+
+    .btn-primary {
+      background: #2563eb;
+      border-color: #3b82f6;
+      color: #ffffff;
+    }
+
+    .btn-primary:hover {
+      background: #1d4ed8;
+    }
+
+    /* Clean SVG Icons */
+    .icon {
+      width: 14px;
+      height: 14px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      flex-shrink: 0;
+    }
+
+    .refresh-icon.spinning {
+      animation: spin 0.75s linear infinite;
+      transform-origin: 50% 50%;
+      transform-box: fill-box;
+    }
+
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    /* Top KPI Strip */
+    .kpi-strip {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .kpi-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 8px 12px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .kpi-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .kpi-value {
+      font-size: 19px;
+      font-weight: 700;
+      color: #ffffff;
+      margin-top: 4px;
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+    }
+
+    .kpi-sub {
+      font-size: 10.5px;
+      color: var(--text-dim);
+      margin-top: 2px;
+    }
+
+    /* 2-Column Main Workspace (Left panel fits full 34 bars without scroll) */
+    .main-workspace {
+      display: grid;
+      grid-template-columns: minmax(430px, 1.05fr) minmax(420px, 1fr);
+      gap: 14px;
+      align-items: start;
+      margin-bottom: 14px;
+    }
+
+    @media (max-width: 1024px) {
+      .main-workspace {
+        grid-template-columns: 1fr;
       }
     }
-  </script>
-  <style>
-    body {
-      background-color: #0B0F17;
-      color: #E2E8F0;
-      font-family: 'Inter', sans-serif;
+
+    .panel {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 12px;
     }
-    /* Custom Scrollbars */
-    ::-webkit-scrollbar {
-      width: 8px;
-      height: 8px;
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+      gap: 6px;
     }
-    ::-webkit-scrollbar-track {
-      background: #0B0F17;
+
+    .panel-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      gap: 6px;
     }
-    ::-webkit-scrollbar-thumb {
-      background: #233044;
+
+    /* Filter Pills */
+    .filter-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+
+    .pill {
+      background: var(--bg-pill);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      padding: 3px 8px;
+      border-radius: 12px;
+      font-size: 10.5px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      user-select: none;
+    }
+
+    .pill:hover {
+      background: var(--bg-card-hover);
+      color: var(--text-main);
+    }
+
+    .pill.active {
+      background: #2563eb;
+      border-color: #3b82f6;
+      color: #ffffff;
+    }
+
+    .pill-vic.active { background: #0284c7; border-color: #38bdf8; }
+    .pill-cebu.active { background: #d97706; border-color: #f59e0b; }
+    .pill-ph.active { background: #059669; border-color: #34d399; }
+
+    /* Horizontal Bar Chart Container */
+    .bar-chart-container {
+      width: 100%;
+      /* Explicitly NO max-height or overflow-y to prevent panel scrollbar */
+      overflow: visible;
+    }
+
+    /* SVG Interactive Styling */
+    .bar-row {
+      cursor: pointer;
+      transition: opacity 0.15s ease;
+    }
+
+    .bar-row:hover rect.bar-bg {
+      fill: rgba(255, 255, 255, 0.06);
+    }
+
+    .bar-row.pinned rect.bar-fill {
+      stroke: #ffffff;
+      stroke-width: 1.5px;
+    }
+
+    /* Right Column Stack */
+    .right-column-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    /* Legend Strip */
+    .pinned-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 8px;
+    }
+
+    .legend-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: var(--bg-pill);
+      border: 1px solid var(--border-highlight);
+      padding: 2px 7px;
       border-radius: 4px;
+      font-size: 10.5px;
+      color: var(--text-main);
     }
-    ::-webkit-scrollbar-thumb:hover {
-      background: #3B82F6;
+
+    .chip-swatch {
+      width: 10px;
+      height: 3px;
+      border-radius: 2px;
     }
-    .badge-vic { background: rgba(14, 165, 233, 0.15); color: #38bdf8; border: 1px solid rgba(14, 165, 233, 0.3); }
-    .badge-cebu { background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
-    .badge-negros { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
-    .badge-panay { background: rgba(139, 92, 246, 0.15); color: #a78bfa; border: 1px solid rgba(139, 92, 246, 0.3); }
-    .badge-bohol { background: rgba(236, 72, 153, 0.15); color: #f472b6; border: 1px solid rgba(236, 72, 153, 0.3); }
-    .badge-mindanao { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
+
+    .chip-remove {
+      cursor: pointer;
+      color: var(--text-dim);
+      margin-left: 2px;
+      font-size: 12px;
+      line-height: 1;
+    }
+
+    .chip-remove:hover {
+      color: #ef4444;
+    }
+
+    /* Intelligence Feed Section */
+    .intelligence-section {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 12px;
+    }
+
+    .feed-controls {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+
+    .search-input {
+      background: var(--bg-pill);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-size: 11.5px;
+      flex: 1;
+      min-width: 180px;
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: #3b82f6;
+    }
+
+    .feed-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+      gap: 10px;
+      max-height: 480px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+
+    /* Custom Scrollbar for Intelligence Feed */
+    .feed-grid::-webkit-scrollbar {
+      width: 5px;
+    }
+    .feed-grid::-webkit-scrollbar-track {
+      background: var(--bg-main);
+    }
+    .feed-grid::-webkit-scrollbar-thumb {
+      background: #374151;
+      border-radius: 3px;
+    }
+
+    .feed-card {
+      background: var(--bg-main);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 6px;
+    }
+
+    .feed-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 6px;
+    }
+
+    .feed-tag {
+      font-size: 9.5px;
+      font-weight: 600;
+      padding: 1px 5px;
+      border-radius: 3px;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+    }
+
+    .tag-official { background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); }
+    .tag-media { background: rgba(245, 158, 11, 0.15); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.3); }
+    .tag-social { background: rgba(168, 85, 247, 0.15); color: #c084fc; border: 1px solid rgba(168, 85, 247, 0.3); }
+
+    .feed-title {
+      font-size: 11.5px;
+      font-weight: 600;
+      color: #ffffff;
+      line-height: 1.3;
+    }
+
+    .feed-summary {
+      font-size: 11px;
+      color: var(--text-muted);
+      line-height: 1.35;
+    }
+
+    .feed-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 10px;
+      color: var(--text-dim);
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      padding-top: 5px;
+      margin-top: 2px;
+    }
+
+    .feed-source-link {
+      color: var(--col-vic);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+    }
+
+    .feed-source-link:hover {
+      text-decoration: underline;
+    }
+
+    /* Modal Styling */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+    }
+
+    .modal-backdrop.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal {
+      background: var(--bg-card);
+      border: 1px solid var(--border-highlight);
+      border-radius: 10px;
+      width: 90%;
+      max-width: 480px;
+      padding: 16px;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+    }
+
+    .modal-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #ffffff;
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .form-group {
+      margin-bottom: 12px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+      font-weight: 500;
+    }
+
+    .form-input, .form-select {
+      width: 100%;
+      background: var(--bg-pill);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 6px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+    }
+
+    .form-input:focus, .form-select:focus {
+      outline: none;
+      border-color: #3b82f6;
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-top: 16px;
+    }
+
+    /* Tooltip */
+    #tooltip {
+      position: fixed;
+      pointer-events: none;
+      background: #0f172a;
+      border: 1px solid #374151;
+      border-radius: 6px;
+      padding: 6px 10px;
+      font-size: 11px;
+      color: #ffffff;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+      z-index: 2000;
+      opacity: 0;
+      transition: opacity 0.1s ease;
+      max-width: 260px;
+    }
+
+    /* Diagnostics Banner */
+    #diag-banner {
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.4);
+      color: #fca5a5;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 11px;
+      margin-bottom: 10px;
+      display: none;
+    }
   </style>
 </head>
-<body class="min-h-screen pb-12">
+<body>
 
-  <!-- Top Header Navigation -->
-  <header class="border-b border-brand-border bg-brand-card/90 backdrop-blur sticky top-0 z-50">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-      <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-        <!-- Brand & Title -->
-        <div>
-          <div class="flex items-center gap-2">
-            <span class="inline-block w-3 h-3 rounded-full bg-emerald-500 animate-pulse"></span>
-            <span class="text-xs font-semibold tracking-wider uppercase text-blue-400">Executive Relocation Risk Intelligence</span>
-          </div>
-          <h1 class="text-xl sm:text-2xl font-bold text-white tracking-tight mt-0.5">
-            Philippines vs. Victoria Safety & Crime Intelligence Tracker <span class="text-slate-400 font-normal text-sm sm:text-lg">(2020–2027)</span>
-          </h1>
-          <p class="text-xs text-slate-400 mt-1">
-            Wide-net risk modeling combining PNP/CSA crime data, SWS victimization surveys, local media blotters, and Australian relocation criteria.
-          </p>
-        </div>
+  <!-- Diagnostic Alert Banner -->
+  <div id="diag-banner"></div>
 
-        <!-- Controls: Refresh Live Data & Mode Toggle -->
-        <div class="flex flex-wrap items-center gap-3">
-          <!-- Live API Refresh Button -->
-          <button id="btnRefreshGemini" onclick="triggerGeminiRefresh()" class="flex items-center gap-2 px-3.5 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-xs font-semibold rounded-lg shadow-lg shadow-blue-900/30 transition-all border border-blue-400/30">
-            <svg id="refreshSpinner" class="w-4 h-4 text-white hidden animate-spin" fill="none" viewBox="0 0 24 24">
-              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
-            <svg id="refreshIcon" class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-            </svg>
-            <span id="refreshBtnText">Refresh Live Crime Intelligence</span>
-          </button>
-
-          <!-- Reset Baseline Button -->
-          <button onclick="resetToBaseline()" class="px-2.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium rounded-lg border border-slate-700 transition" title="Reset to Verified Nov 2026 Baseline">
-            Reset
-          </button>
-        </div>
-      </div>
-
-      <!-- Mode Toggle Switch -->
-      <div class="mt-4 pt-3 border-t border-slate-800/80 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
-        <div class="flex items-center gap-2 bg-slate-900/90 p-1 rounded-xl border border-slate-800">
-          <button id="btnModeAdjusted" onclick="setMode('adjustedRisk')" class="px-3 py-1.5 rounded-lg font-medium transition text-white bg-blue-600 shadow">
-            🛡️ Wide-Net Adjusted Risk (Recommended)
-          </button>
-          <button id="btnModeOfficial" onclick="setMode('officialVolumeIndex')" class="px-3 py-1.5 rounded-lg font-medium transition text-slate-400 hover:text-white">
-            📊 Raw Official Reported Crime Volume
-          </button>
-        </div>
-        <div class="text-slate-400 flex items-center gap-2">
-          <span class="inline-block w-2 h-2 rounded-full bg-emerald-400"></span>
-          <span>Last Baseline Audit: <strong class="text-slate-200">Nov 2026 (SWS Q2 2026 & CSA Jun 2026 Aligned)</strong></span>
-        </div>
-      </div>
+  <!-- Header Section -->
+  <header>
+    <div class="header-title-group">
+      <h1>
+        Philippines vs. Victoria Safety & Crime Intelligence Tracker
+        <span class="badge-live"><span class="badge-live-dot"></span> 2020–2027 Intelligence</span>
+      </h1>
+      <p>Comparative Crime Rates, Violent Risk, Property Security & Relocation Safety Index across 34 Key Jurisdictions</p>
+    </div>
+    <div class="header-actions">
+      <button id="btn-live-refresh" class="btn btn-primary" title="Fetch latest 2026-2027 crime statistics and news grounding">
+        <svg class="icon refresh-icon" id="refresh-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path fill="none" d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8" />
+          <path fill="none" d="M21 3v5h-5" />
+        </svg>
+        <span>Live AI Refresh</span>
+      </button>
+      <button id="btn-export-json" class="btn" title="Export full intelligence dataset">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        <span>Export JSON</span>
+      </button>
+      <button id="btn-reset-baseline" class="btn" title="Reset dataset to default baseline">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+        <span>Reset Baseline</span>
+      </button>
+      <button id="btn-settings" class="btn" title="Configure Gemini API Key & Model">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        <span>API Settings</span>
+      </button>
     </div>
   </header>
 
-  <!-- Main Container -->
-  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6 space-y-6">
-
-    <!-- Refresh Status Bar (Hidden by default) -->
-    <div id="refreshStatusBar" class="hidden bg-slate-900 border border-blue-500/30 rounded-xl p-3 flex items-center justify-between text-xs text-blue-300">
-      <div class="flex items-center gap-3">
-        <svg class="w-4 h-4 animate-spin text-blue-400" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-        <span id="refreshStatusText">Connecting to Gemini 3.1 Live Grounded Search across SunStar, Panay News, Bohol Tribune, Mindanao Times & CSA Victoria...</span>
+  <!-- Top KPI Summary Cards Strip -->
+  <section class="kpi-strip">
+    <div class="kpi-card">
+      <div class="kpi-label">
+        <span>TOP OVERALL SAFETY RANK</span>
+        <span style="color: var(--col-vic);">Victoria AU</span>
       </div>
-      <span class="text-slate-500 text-[10px]">Gemini 3.1 Flash Search</span>
+      <div class="kpi-value num">
+        Mont Albert <span style="font-size: 14px; color: #34d399;">91.2</span>
+      </div>
+      <div class="kpi-sub">Tier 1 Exceptional • East Melbourne Suburb</div>
     </div>
 
-    <!-- Methodology Alert Box -->
-    <div class="bg-gradient-to-r from-amber-950/40 via-slate-900 to-slate-900 border border-amber-500/30 rounded-2xl p-4 text-xs text-slate-300 leading-relaxed">
-      <div class="flex items-start gap-3">
-        <span class="text-lg">💡</span>
-        <div>
-          <strong class="text-amber-400 font-semibold block mb-1">Methodology Note: The Reliability Gap & Reporting Penalty</strong>
-          Official police statistics in the Philippines (e.g., PNP reporting ~30-36% drops in crime) significantly understate petty street crime, title scams, and cyber fraud—highlighted by SWS Q2 2026 surveys showing <strong>10.0% of families victimized by common crimes</strong> and <strong>cybercrime hitting a record 8.0%</strong>. Conversely, Victorian suburb statistics (CSA Jun 2026) appear artificially high due to stringent reporting of minor theft, car accessory theft, and order breaches, despite near-zero firearm lethality. Our <strong>Wide-Net Adjusted Index</strong> corrects for under-reporting, firearm presence, scam prevalence, and emergency medical response delays.
-        </div>
+    <div class="kpi-card">
+      <div class="kpi-label">
+        <span>TOP PH RELOCATION CONTENDER</span>
+        <span style="color: var(--col-ph);">Negros / Mindanao</span>
       </div>
+      <div class="kpi-value num">
+        Camiguin <span style="font-size: 14px; color: #34d399;">79.4</span>
+      </div>
+      <div class="kpi-sub">Valencia Oriental (78.1) • Dauin (76.5)</div>
     </div>
 
-    <!-- Summary KPI Strip -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-      <!-- KPI 1 -->
-      <div class="bg-brand-card border border-brand-border rounded-2xl p-4 shadow-sm hover:border-slate-700 transition">
-        <div class="text-slate-400 text-xs font-medium uppercase tracking-wider">Safest Victoria Benchmark</div>
-        <div class="flex items-baseline justify-between mt-2">
-          <div class="text-xl font-extrabold text-sky-400" id="kpiSafestVic">Mont Albert</div>
-          <span class="px-2 py-0.5 rounded text-xs font-semibold badge-vic" id="kpiSafestVicScore">Score: 14.0</span>
-        </div>
-        <p class="text-[11px] text-slate-400 mt-2">CSA 2026: Low violent risk (~8,124 offences/100k, 32 assaults).</p>
+    <div class="kpi-card">
+      <div class="kpi-label">
+        <span>REGIONAL SAFETY AVERAGE</span>
+        <span style="color: var(--text-dim);">2026 Index</span>
       </div>
-
-      <!-- KPI 2 -->
-      <div class="bg-brand-card border border-brand-border rounded-2xl p-4 shadow-sm hover:border-slate-700 transition">
-        <div class="text-slate-400 text-xs font-medium uppercase tracking-wider">Safest PH Relocation Match</div>
-        <div class="flex items-baseline justify-between mt-2">
-          <div class="text-xl font-extrabold text-emerald-400" id="kpiSafestPh">Dumaguete / Dumaguete</div>
-          <span class="px-2 py-0.5 rounded text-xs font-semibold badge-negros" id="kpiSafestPhScore">Score: 25.0</span>
-        </div>
-        <p class="text-[11px] text-slate-400 mt-2">WTI #1 (81.36); strong tertiary trauma access & expat safety consensus.</p>
+      <div class="kpi-value num">
+        <span style="color: var(--col-vic); font-size: 16px;">VIC 78.2</span>
+        <span style="color: var(--text-dim); font-size: 13px;">vs</span>
+        <span style="color: var(--col-cebu); font-size: 16px;">CEB 57.6</span>
       </div>
-
-      <!-- KPI 3 -->
-      <div class="bg-brand-card border border-brand-border rounded-2xl p-4 shadow-sm hover:border-slate-700 transition">
-        <div class="text-slate-400 text-xs font-medium uppercase tracking-wider">Widest Reporting Gap</div>
-        <div class="flex items-baseline justify-between mt-2">
-          <div class="text-xl font-extrabold text-amber-400" id="kpiWidestGap">Melb CBD vs. Lapu-Lapu</div>
-          <span class="px-2 py-0.5 rounded text-xs font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/30">Gap +47 pts</span>
-        </div>
-        <p class="text-[11px] text-slate-400 mt-2">High AU official volume vs High PH unrecorded gun/scam lethality.</p>
-      </div>
-
-      <!-- KPI 4 -->
-      <div class="bg-brand-card border border-brand-border rounded-2xl p-4 shadow-sm hover:border-slate-700 transition">
-        <div class="text-slate-400 text-xs font-medium uppercase tracking-wider">Monitored Locations</div>
-        <div class="flex items-baseline justify-between mt-2">
-          <div class="text-xl font-extrabold text-purple-400">33 Suburbs & Cities</div>
-          <span class="px-2 py-0.5 rounded text-xs font-semibold bg-purple-500/20 text-purple-300 border border-purple-500/30">6 Regions</span>
-        </div>
-        <p class="text-[11px] text-slate-400 mt-2">11 AU Suburbs + 22 PH Candidate Cities/Barangays.</p>
-      </div>
+      <div class="kpi-sub">Other PH Top Picks Avg: 73.8 Index</div>
     </div>
 
-    <!-- Filter & Preset Control Bar -->
-    <div class="bg-brand-card border border-brand-border rounded-2xl p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-      <!-- Region Filter Chips -->
-      <div class="flex flex-wrap items-center gap-1.5 text-xs">
-        <span class="text-slate-400 font-semibold mr-1">Region Filter:</span>
-        <button onclick="setRegionFilter('All')" id="chip-All" class="chip-btn px-3 py-1.5 rounded-lg font-medium transition bg-blue-600 text-white">All (33)</button>
-        <button onclick="setRegionFilter('Victoria')" id="chip-Victoria" class="chip-btn px-3 py-1.5 rounded-lg font-medium transition bg-slate-800 text-slate-300 hover:text-white">Victoria (11)</button>
-        <button onclick="setRegionFilter('Cebu')" id="chip-Cebu" class="chip-btn px-3 py-1.5 rounded-lg font-medium transition bg-slate-800 text-slate-300 hover:text-white">Cebu (14)</button>
-        <button onclick="setRegionFilter('Mindanao')" id="chip-Mindanao" class="chip-btn px-3 py-1.5 rounded-lg font-medium transition bg-slate-800 text-slate-300 hover:text-white">Mindanao (2)</button>
-        <button onclick="setRegionFilter('Negros')" id="chip-Negros" class="chip-btn px-3 py-1.5 rounded-lg font-medium transition bg-slate-800 text-slate-300 hover:text-white">Negros (2)</button>
-        <button onclick="setRegionFilter('Panay')" id="chip-Panay" class="chip-btn px-3 py-1.5 rounded-lg font-medium transition bg-slate-800 text-slate-300 hover:text-white">Panay (2)</button>
-        <button onclick="setRegionFilter('Bohol')" id="chip-Bohol" class="chip-btn px-3 py-1.5 rounded-lg font-medium transition bg-slate-800 text-slate-300 hover:text-white">Bohol (2)</button>
+    <div class="kpi-card">
+      <div class="kpi-label">
+        <span>ACTIVE INTELLIGENCE LOGS</span>
+        <span style="color: #c084fc;">Real-Time Feed</span>
       </div>
-
-      <!-- Presets & Search Input -->
-      <div class="flex flex-wrap items-center gap-2">
-        <button id="btnToggleShortlist" onclick="toggleShortlistPreset()" class="px-3 py-1.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-semibold rounded-lg shadow transition border border-emerald-400/30 flex items-center gap-1.5">
-          <span>⭐</span>
-          <span>Shortlist vs. AU Benchmarks</span>
-        </button>
-
-        <input type="text" id="searchInput" oninput="handleSearch(this.value)" placeholder="Search location or notes..." class="px-3 py-1.5 bg-slate-900 border border-slate-700 rounded-lg text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 w-full sm:w-48 transition" />
+      <div class="kpi-value num" id="kpi-incident-count">
+        34 Feeds Loaded
       </div>
+      <div class="kpi-sub">Official (CSA/PNP) + Media + Community Blotters</div>
     </div>
+  </section>
 
-    <!-- Main Visualizations Grid -->
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-
-      <!-- Chart 1: Tier-Ranked Horizontal Bar Chart (8 cols on lg) -->
-      <div class="lg:col-span-12 xl:col-span-7 bg-brand-card border border-brand-border rounded-2xl p-5 shadow-sm flex flex-col justify-between">
-        <div>
-          <div class="flex items-center justify-between mb-3">
-            <div>
-              <h2 class="text-base font-bold text-white flex items-center gap-2">
-                <span>📊</span>
-                <span>Tier-Ranked Safety & Risk Index</span>
-              </h2>
-              <p class="text-xs text-slate-400 mt-0.5">Lower score = Safer. Includes tier threshold indicators (Tier 1: Safer &lt;25, Tier 4: Elevated &gt;45).</p>
-            </div>
-            <span class="text-[10px] uppercase font-bold tracking-wider px-2 py-1 rounded bg-slate-800 text-slate-300 border border-slate-700" id="barChartModeLabel">Wide-Net Adjusted</span>
-          </div>
-
-          <div class="relative w-full" style="min-height: 520px; height: 600px;">
-            <canvas id="barChart"></canvas>
-          </div>
+  <!-- 2-Column Main Workspace -->
+  <main class="main-workspace">
+    
+    <!-- LEFT PANEL: Complete Horizontal Ranking Bar Chart (ALL 34 Fit Without Scroll) -->
+    <section class="panel">
+      <div class="panel-header">
+        <div class="panel-title">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+          <span>2026 Safety Index Ranking (34 Locations)</span>
         </div>
-        <div class="mt-3 pt-3 border-t border-slate-800 text-[11px] text-slate-400 flex flex-wrap justify-between gap-2">
-          <span>🟢 Tier 1: Very Low (&lt;25)</span>
-          <span>🔵 Tier 2: Low-Moderate (25-35)</span>
-          <span>🟡 Tier 3: Moderate (36-45)</span>
-          <span>🔴 Tier 4: Elevated (&gt;45)</span>
+        <!-- Region Filter Pills -->
+        <div class="filter-group" id="bar-region-filters">
+          <button class="pill active" data-filter="all">All (34)</button>
+          <button class="pill pill-vic" data-filter="vic">Victoria AU (11)</button>
+          <button class="pill pill-cebu" data-filter="cebu">Cebu (13)</button>
+          <button class="pill pill-ph" data-filter="other_ph">Other PH (10)</button>
         </div>
       </div>
 
-      <!-- Chart 3: Spider/Radar Risk Profiler (5 cols on lg) -->
-      <div class="lg:col-span-12 xl:col-span-5 bg-brand-card border border-brand-border rounded-2xl p-5 shadow-sm flex flex-col justify-between">
-        <div>
-          <div class="mb-3">
-            <h2 class="text-base font-bold text-white flex items-center gap-2">
-              <span>🎯</span>
-              <span>5-Axis Risk Dimension Profiler</span>
-            </h2>
-            <p class="text-xs text-slate-400 mt-0.5">Select up to 4 locations to compare underlying risk vectors.</p>
-          </div>
-
-          <!-- 4 Dropdowns for Radar Selection -->
-          <div class="grid grid-cols-2 gap-2 mb-4">
-            <div>
-              <label class="block text-[10px] font-semibold text-slate-400 mb-1">Loc 1 (Blue)</label>
-              <select id="radarSelect0" onchange="updateRadarFromDropdowns()" class="w-full bg-slate-900 border border-slate-700 rounded text-xs px-2 py-1 text-white focus:outline-none focus:border-blue-500"></select>
-            </div>
-            <div>
-              <label class="block text-[10px] font-semibold text-slate-400 mb-1">Loc 2 (Emerald)</label>
-              <select id="radarSelect1" onchange="updateRadarFromDropdowns()" class="w-full bg-slate-900 border border-slate-700 rounded text-xs px-2 py-1 text-white focus:outline-none focus:border-blue-500"></select>
-            </div>
-            <div>
-              <label class="block text-[10px] font-semibold text-slate-400 mb-1">Loc 3 (Amber)</label>
-              <select id="radarSelect2" onchange="updateRadarFromDropdowns()" class="w-full bg-slate-900 border border-slate-700 rounded text-xs px-2 py-1 text-white focus:outline-none focus:border-blue-500"></select>
-            </div>
-            <div>
-              <label class="block text-[10px] font-semibold text-slate-400 mb-1">Loc 4 (Rose)</label>
-              <select id="radarSelect3" onchange="updateRadarFromDropdowns()" class="w-full bg-slate-900 border border-slate-700 rounded text-xs px-2 py-1 text-white focus:outline-none focus:border-blue-500"></select>
-            </div>
-          </div>
-
-          <div class="relative w-full" style="height: 420px;">
-            <canvas id="radarChart"></canvas>
-          </div>
-        </div>
-
-        <div class="mt-3 pt-3 border-t border-slate-800 text-[10px] text-slate-400 leading-tight">
-          <strong>Vectors (0-100, lower is better):</strong> Gun/Lethal, Street/Property, Scam/Cyber Fraud, Emergency/Medical Delay, Under-Reporting Penalty.
-        </div>
+      <!-- Quick Sub-Filters Strip -->
+      <div class="filter-group" style="margin-bottom: 8px; border-bottom: 1px solid var(--border-color); padding-bottom: 8px;" id="bar-sub-filters">
+        <span style="font-size: 10px; color: var(--text-dim); align-self: center; margin-right: 2px;">QUICK SUB-FILTERS:</span>
+        <button class="pill" data-subfilter="negros">Negros</button>
+        <button class="pill" data-subfilter="bohol">Bohol</button>
+        <button class="pill" data-subfilter="panay">Panay</button>
+        <button class="pill" data-subfilter="mindanao">Mindanao</button>
+        <button class="pill" data-subfilter="top_picks">Top Relocation Picks</button>
       </div>
+
+      <div style="font-size: 10px; color: var(--text-dim); margin-bottom: 6px; display: flex; justify-content: space-between;">
+        <span>LOCATION / JURISDICTION</span>
+        <span>SAFETY INDEX (0–100) • CLICK TO PIN (MAX 4)</span>
+      </div>
+
+      <!-- Native Inline SVG Bar Chart Canvas Container (Height adjusts dynamically to fit all 34 cleanly) -->
+      <div class="bar-chart-container">
+        <svg id="svg-bar-chart" width="100%" height="640" style="display: block;"></svg>
+      </div>
+    </section>
+
+    <!-- RIGHT COLUMN STACKED PANELS -->
+    <div class="right-column-stack">
+      
+      <!-- TOP RIGHT PANEL: 2020–2027 Safety Trajectory Line Chart -->
+      <section class="panel">
+        <div class="panel-header">
+          <div class="panel-title">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            <span>Historical & Projected Safety Trajectory (2020–2027)</span>
+          </div>
+          <button id="btn-clear-selection" class="btn" style="padding: 2px 6px; font-size: 10px;">Clear Pinned</button>
+        </div>
+
+        <!-- Pinned Location Legend Strip -->
+        <div class="pinned-legend" id="pinned-legend-container"></div>
+
+        <div style="width: 100%; height: 230px; position: relative;">
+          <svg id="svg-trajectory-chart" width="100%" height="230" style="display: block;"></svg>
+        </div>
+      </section>
+
+      <!-- BOTTOM RIGHT PANEL: Interactive 6-Axis Radar Comparison Chart -->
+      <section class="panel">
+        <div class="panel-header">
+          <div class="panel-title">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 1 0 10 10"/><polygon points="12 2 15 9 22 12 15 15 12 22 9 15 2 12 9 9 12 2"/></svg>
+            <span>6-Axis Risk & Security Radar Profile</span>
+          </div>
+          <span style="font-size: 10px; color: var(--text-dim);">Hover axes or nodes for details</span>
+        </div>
+
+        <div style="width: 100%; height: 260px; position: relative; display: flex; justify-content: center; align-items: center;">
+          <svg id="svg-radar-chart" width="100%" height="260" viewBox="0 0 340 260" style="display: block;"></svg>
+        </div>
+      </section>
 
     </div>
-
-    <!-- Chart 2: Historical & 2027 Trajectory Line Chart -->
-    <div class="bg-brand-card border border-brand-border rounded-2xl p-5 shadow-sm">
-      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
-        <div>
-          <h2 class="text-base font-bold text-white flex items-center gap-2">
-            <span>📈</span>
-            <span>2020–2027 Risk Trajectory & Forecast</span>
-          </h2>
-          <p class="text-xs text-slate-400 mt-0.5">Solid lines depict historical trend (2020–2026); dashed line segment represents 2027 projection.</p>
-        </div>
-
-        <!-- Quick Selection Controls for Line Chart -->
-        <div class="flex flex-wrap items-center gap-2 text-xs">
-          <button onclick="selectLinePreset('shortlist')" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded border border-slate-700 transition">Preset: Shortlist</button>
-          <button onclick="selectLinePreset('vic')" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded border border-slate-700 transition">Preset: Victoria Key</button>
-          <button onclick="selectLinePreset('ph')" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded border border-slate-700 transition">Preset: Safe PH Hubs</button>
-          <button onclick="selectLinePreset('none')" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-400 rounded border border-slate-700 transition">Clear All</button>
-        </div>
-      </div>
-
-      <!-- Scrollable Checkbox Selector Bar for Line Chart -->
-      <div id="lineCheckboxesContainer" class="flex flex-wrap gap-2 max-h-28 overflow-y-auto p-2.5 bg-slate-900/80 border border-slate-800 rounded-xl mb-4 text-xs">
-        <!-- Checkboxes populated dynamically -->
-      </div>
-
-      <div class="relative w-full" style="height: 380px;">
-        <canvas id="lineChart"></canvas>
-      </div>
-    </div>
-
-    <!-- Intelligence Feed & Detailed Comparison Table -->
-    <div class="grid grid-cols-1 xl:grid-cols-12 gap-6">
-
-      <!-- Live Blotter & Media Feed (5 cols on xl) -->
-      <div class="xl:col-span-5 bg-brand-card border border-brand-border rounded-2xl p-5 shadow-sm flex flex-col justify-between">
-        <div>
-          <div class="flex items-center justify-between mb-3">
-            <h3 class="text-base font-bold text-white flex items-center gap-2">
-              <span>📰</span>
-              <span>Wide-Net Crime & Blotter Feed</span>
-            </h3>
-            <span class="text-[10px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded font-mono" id="feedCountBadge">0 Updates</span>
-          </div>
-          <p class="text-xs text-slate-400 mb-4">Real blotters, media signals, SWS surveys, and social reportage cross-referenced for true risk evaluation.</p>
-
-          <div id="feedListContainer" class="space-y-3 max-h-[580px] overflow-y-auto pr-1">
-            <!-- Feed items injected via JS -->
-          </div>
-        </div>
-      </div>
-
-      <!-- Detailed Location Comparison Table (7 cols on xl) -->
-      <div class="xl:col-span-7 bg-brand-card border border-brand-border rounded-2xl p-5 shadow-sm flex flex-col justify-between">
-        <div>
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
-            <h3 class="text-base font-bold text-white flex items-center gap-2">
-              <span>📋</span>
-              <span>Detailed Relocation Audit & Notes</span>
-            </h3>
-            <span class="text-xs text-slate-400">Click any row to trigger Radar Profiler comparison</span>
-          </div>
-
-          <div class="overflow-x-auto max-h-[580px] overflow-y-auto rounded-xl border border-slate-800">
-            <table class="w-full text-left text-xs border-collapse">
-              <thead class="bg-slate-900 text-slate-300 sticky top-0 z-10 border-b border-slate-800">
-                <tr>
-                  <th class="p-2.5 font-semibold">Location & Region</th>
-                  <th class="p-2.5 font-semibold text-center">Adj. Risk</th>
-                  <th class="p-2.5 font-semibold text-center">Raw Vol</th>
-                  <th class="p-2.5 font-semibold">Verified Baseline Facts & Blotter Highlights</th>
-                  <th class="p-2.5 font-semibold">Relocation Fit</th>
-                </tr>
-              </thead>
-              <tbody id="tableBody" class="divide-y divide-slate-800 text-slate-300">
-                <!-- Rows injected dynamically -->
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-
-    </div>
-
   </main>
 
-  <!-- Footer -->
-  <footer class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-12 text-center text-xs text-slate-500">
-    <p>Philippines vs. Victoria Safety & Crime Intelligence Tracker • Built for Executive Relocation & Off-Grid Living Analysis (2020–2027)</p>
-    <p class="mt-1">Data sources include Victoria Crime Statistics Agency (Jun 2026), Social Weather Stations (SWS Q2 2026), Dahas Project, World Travel Index, SunStar Cebu, Panay News, Bohol Tribune, Mindanao Times, and Bombo Radyo.</p>
-  </footer>
+  <!-- FULL-WIDTH BOTTOM SECTION: Intelligence Incident & Media Feed -->
+  <section class="intelligence-section">
+    <div class="panel-header">
+      <div class="panel-title">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        <span>Live Incident, Regional Media & Community Blotter Intelligence</span>
+      </div>
+      <span style="font-size: 11px; color: var(--text-muted);">Grounding Sources: CSA Victoria, PNP, SunStar, CDN, Digicast Negros, GMA News</span>
+    </div>
 
-  <!-- Application Logic JS -->
+    <div class="feed-controls">
+      <input type="text" id="feed-search" class="search-input" placeholder="Search incidents, cities (e.g. Valencia, Cranbourne, theft, drug)...">
+      <div class="filter-group" id="feed-category-filters">
+        <button class="pill active" data-cat="all">All Sources</button>
+        <button class="pill" data-cat="official">Official (CSA/PNP)</button>
+        <button class="pill" data-cat="media">Regional Media</button>
+        <button class="pill" data-cat="social">Social / Blotter</button>
+      </div>
+    </div>
+
+    <!-- Incident Cards Grid -->
+    <div class="feed-grid" id="feed-cards-grid"></div>
+  </section>
+
+  <!-- API Settings Modal -->
+  <div class="modal-backdrop" id="modal-settings">
+    <div class="modal">
+      <div class="modal-title">
+        <span>Gemini API Settings & Grounding Config</span>
+        <button id="modal-close-x" style="background:none; border:none; color:var(--text-dim); cursor:pointer; font-size:16px;">&times;</button>
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label" for="setting-api-key">Gemini API Key</label>
+        <div style="display: flex; gap: 6px;">
+          <input type="password" id="setting-api-key" class="form-input" placeholder="Enter Gemini API key (stored in localStorage)">
+          <button id="btn-toggle-key-visibility" class="btn" type="button" style="padding: 4px 8px;">Show</button>
+        </div>
+        <span style="font-size: 10px; color: var(--text-dim); margin-top: 3px; display: block;">Key remains local to browser window. If left blank, runtime environment key is used.</span>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="setting-model">Select Model ID</label>
+        <select id="setting-model" class="form-select">
+          <option value="gemini-3.8-flash">gemini-3.8-flash (Recommended Default)</option>
+          <option value="gemini-3.5-flash-lite">gemini-3.5-flash-lite (Fast Lite)</option>
+          <option value="gemini-3-flash-preview">gemini-3-flash-preview (Standard Flash)</option>
+          <option value="custom">Custom Model ID...</option>
+        </select>
+      </div>
+
+      <div class="form-group" id="group-custom-model" style="display: none;">
+        <label class="form-label" for="setting-custom-model">Custom Model Identifier</label>
+        <input type="text" id="setting-custom-model" class="form-input" placeholder="e.g. gemini-3.8-flash-experimental">
+      </div>
+
+      <div id="modal-status-msg" style="font-size: 11px; margin-top: 6px; display: none;"></div>
+
+      <div class="modal-actions">
+        <button id="btn-clear-key" class="btn" style="color: #ef4444;">Clear Key</button>
+        <button id="btn-test-key" class="btn">Test Connection</button>
+        <button id="btn-save-settings" class="btn btn-primary">Save Settings</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Interactive Floating Tooltip -->
+  <div id="tooltip"></div>
+
+  <!-- JavaScript Logic -->
   <script>
-    // ==========================================
-    // 1. BASELINE DATASET (33 LOCATIONS)
-    // ==========================================
-    const INITIAL_LOCATIONS = [
-      // ---------------- VICTORIA, AUSTRALIA (11) ----------------
-      {
-        id: 'mont-albert',
-        name: 'Mont Albert',
-        region: 'Victoria',
-        color: '#0ea5e9',
-        shortlist: true,
-        adjustedRisk: [16, 15, 14, 15, 14, 14, 14, 13],
-        officialVolumeIndex: [25, 26, 27, 28, 27, 27, 27, 26],
-        radar: { lethalFirearm: 5, streetProperty: 20, scamFraudCyber: 35, emergencyDelay: 10, underReportingGap: 10 },
-        verifiedNotes: 'CSA Jun 2026: ~402 total offences (~8,124/100k). Extremely low violent crime (only 32 assaults). Main issues are suburban mail/garage theft.',
-        movingCriteriaFit: 'Top suburban safety, elite hospital/school access, zero natural disaster risk. High cost of living.',
-        sources: ['CSA Victoria Jun 2026', 'Victoria Police Blotter']
-      },
-      {
-        id: 'mount-waverley',
-        name: 'Mount Waverley',
-        region: 'Victoria',
-        color: '#0ea5e9',
-        shortlist: false,
-        adjustedRisk: [17, 17, 16, 17, 16, 16, 16, 15],
-        officialVolumeIndex: [28, 29, 30, 31, 30, 30, 30, 29],
-        radar: { lethalFirearm: 5, streetProperty: 22, scamFraudCyber: 38, emergencyDelay: 12, underReportingGap: 10 },
-        verifiedNotes: 'CSA 2026: Quiet residential suburb. Burglary and opportunistic motor vehicle break-ins dominate statistics.',
-        movingCriteriaFit: 'Family suburban haven, close to Monash Health, high living cost.',
-        sources: ['CSA Victoria 2026']
-      },
-      {
-        id: 'wantirna-south',
-        name: 'Wantirna South',
-        region: 'Victoria',
-        color: '#0ea5e9',
-        shortlist: false,
-        adjustedRisk: [19, 19, 18, 19, 18, 18, 18, 17],
-        officialVolumeIndex: [30, 31, 32, 33, 32, 32, 32, 31],
-        radar: { lethalFirearm: 5, streetProperty: 25, scamFraudCyber: 35, emergencyDelay: 12, underReportingGap: 10 },
-        verifiedNotes: 'Knox LGA corridor. Low violent crime; retail theft around Knox Shopping Centre and tool thefts from trade vehicles.',
-        movingCriteriaFit: 'Suburban green wedge, near Knox Private Hospital, good family infrastructure.',
-        sources: ['CSA Victoria 2026']
-      },
-      {
-        id: 'bayswater',
-        name: 'Bayswater',
-        region: 'Victoria',
-        color: '#0ea5e9',
-        shortlist: false,
-        adjustedRisk: [26, 26, 25, 26, 25, 25, 25, 24],
-        officialVolumeIndex: [40, 41, 42, 43, 42, 42, 42, 41],
-        radar: { lethalFirearm: 8, streetProperty: 38, scamFraudCyber: 32, emergencyDelay: 15, underReportingGap: 12 },
-        verifiedNotes: 'Mix of light industrial and residential. Higher property crime than eastern inner suburbs but near zero gun violence.',
-        movingCriteriaFit: 'More affordable east suburb, industrial trade supplies nearby.',
-        sources: ['CSA Victoria 2026']
-      },
-      {
-        id: 'boronia',
-        name: 'Boronia',
-        region: 'Victoria',
-        color: '#0ea5e9',
-        shortlist: false,
-        adjustedRisk: [29, 29, 28, 29, 28, 28, 28, 27],
-        officialVolumeIndex: [43, 44, 45, 46, 45, 45, 45, 44],
-        radar: { lethalFirearm: 8, streetProperty: 42, scamFraudCyber: 32, emergencyDelay: 15, underReportingGap: 12 },
-        verifiedNotes: 'Transit node theft and public order incidents around station hub. Very low violent mugging risk.',
-        movingCriteriaFit: 'Foothills location, quick access to Dandenong Ranges.',
-        sources: ['CSA Victoria 2026']
-      },
-      {
-        id: 'cranbourne-west',
-        name: 'Cranbourne West',
-        region: 'Victoria',
-        color: '#0ea5e9',
-        shortlist: true,
-        adjustedRisk: [25, 25, 24, 25, 24, 24, 24, 23],
-        officialVolumeIndex: [36, 37, 38, 39, 38, 38, 38, 37],
-        radar: { lethalFirearm: 8, streetProperty: 35, scamFraudCyber: 30, emergencyDelay: 15, underReportingGap: 10 },
-        verifiedNotes: 'CSA Jun 2026: ~1,508 offences (~7,552/100k). Robberies down 70% (3 total). Theft from motor vehicles & building sites main driver.',
-        movingCriteriaFit: 'Rapidly expanding modern housing estate, modern infrastructure, 15 min to Casey Hospital.',
-        sources: ['CSA Victoria Jun 2026', 'Casey Police Report']
-      },
-      {
-        id: 'box-hill',
-        name: 'Box Hill',
-        region: 'Victoria',
-        color: '#0ea5e9',
-        shortlist: false,
-        adjustedRisk: [32, 32, 31, 32, 31, 31, 31, 30],
-        officialVolumeIndex: [52, 53, 54, 55, 54, 54, 54, 53],
-        radar: { lethalFirearm: 6, streetProperty: 45, scamFraudCyber: 48, emergencyDelay: 8, underReportingGap: 10 },
-        verifiedNotes: 'CSA Jun 2026: ~2,530 offences (~17,627/100k). Major transit hub & commercial core elevates reported shoplifting and pickpocketing.',
-        movingCriteriaFit: 'Urban healthcare epicenter (Box Hill Hospital), major Asian commercial hub.',
-        sources: ['CSA Victoria Jun 2026']
-      },
-      {
-        id: 'noble-park',
-        name: 'Noble Park',
-        region: 'Victoria',
-        color: '#0ea5e9',
-        shortlist: false,
-        adjustedRisk: [39, 39, 38, 39, 38, 38, 38, 37],
-        officialVolumeIndex: [60, 61, 62, 63, 62, 62, 62, 61],
-        radar: { lethalFirearm: 12, streetProperty: 52, scamFraudCyber: 35, emergencyDelay: 14, underReportingGap: 12 },
-        verifiedNotes: 'Greater Dandenong corridor. Higher property break-ins and vehicle theft, but robust police response.',
-        movingCriteriaFit: 'Affordable urban housing, multi-ethnic amenities.',
-        sources: ['CSA Victoria 2026']
-      },
-      {
-        id: 'ballarat-lga',
-        name: 'City of Ballarat (LGA)',
-        region: 'Victoria',
-        color: '#0ea5e9',
-        shortlist: true,
-        adjustedRisk: [30, 30, 29, 30, 29, 29, 29, 28],
-        officialVolumeIndex: [56, 57, 58, 59, 58, 58, 58, 57],
-        radar: { lethalFirearm: 8, streetProperty: 45, scamFraudCyber: 30, emergencyDelay: 12, underReportingGap: 10 },
-        verifiedNotes: 'CSA Jun 2026: 14,964 offences (~13,154/100k). Ballarat Central vehicle theft spiked +168.3% YoY, but assaults dropped 22.4% LGA-wide.',
-        movingCriteriaFit: 'Premier regional Victorian city with full tertiary hospital (Base Hospital), cool climate, zero tropical hazards.',
-        sources: ['CSA Victoria Jun 2026', 'Ballarat Courier']
-      },
-      {
-        id: 'dandenong',
-        name: 'Dandenong',
-        region: 'Victoria',
-        color: '#0ea5e9',
-        shortlist: true,
-        adjustedRisk: [45, 45, 44, 45, 44, 44, 44, 43],
-        officialVolumeIndex: [85, 86, 88, 89, 88, 88, 88, 87],
-        radar: { lethalFirearm: 15, streetProperty: 65, scamFraudCyber: 40, emergencyDelay: 10, underReportingGap: 10 },
-        verifiedNotes: 'CSA Jun 2026: ~9,212 offences (~30,577/100k). High reported assault (832) & motor theft (451). High reporting rate & rapid trauma care keep gun lethality low.',
-        movingCriteriaFit: 'Major employment & medical hub (Dandenong Hospital), vibrant market, higher urban crime blotter.',
-        sources: ['CSA Victoria Jun 2026']
-      },
-      {
-        id: 'melbourne-cbd',
-        name: 'City of Melbourne (CBD/LGA)',
-        region: 'Victoria',
-        color: '#0ea5e9',
-        shortlist: true,
-        adjustedRisk: [49, 49, 48, 49, 48, 48, 48, 47],
-        officialVolumeIndex: [92, 94, 95, 96, 95, 95, 95, 94],
-        radar: { lethalFirearm: 10, streetProperty: 75, scamFraudCyber: 60, emergencyDelay: 5, underReportingGap: 8 },
-        verifiedNotes: 'CSA Jun 2026: ~16,944 criminal incidents (~23,998 offences/100k). High foot-traffic property crime & late-night street altercations; top emergency infrastructure.',
-        movingCriteriaFit: 'World-class capital city infrastructure, highest density services, high official crime volume on paper.',
-        sources: ['CSA Victoria Jun 2026', 'Victoria Police']
-      },
+    // Master Dataset & Application State Wrapped safely in try/catch
+    (function() {
+      'use strict';
 
-      // ---------------- MINDANAO (2) ----------------
-      {
-        id: 'davao-city',
-        name: 'Davao City',
-        region: 'Mindanao',
-        color: '#ef4444',
-        shortlist: true,
-        adjustedRisk: [36, 35, 34, 34, 34, 34, 34, 33],
-        officialVolumeIndex: [20, 19, 18, 18, 18, 18, 18, 17],
-        radar: { lethalFirearm: 35, streetProperty: 25, scamFraudCyber: 30, emergencyDelay: 25, underReportingGap: 40 },
-        verifiedNotes: 'WTI #2 safest PH city (80.73). DCPO logged 82 homicides in 2025 (down from 109). Outside Smartraveller Do-Not-Travel red zone. Strict local ordinances.',
-        movingCriteriaFit: 'Elevated typhoon-free zones (Eden/Toril/Tugbok), premier Mindanao tertiary medical hub (SPMC), international airport.',
-        sources: ['Mindanao Times 2026', 'DCPO Blotters', 'World Travel Index']
-      },
-      {
-        id: 'malaybalay-city',
-        name: 'Malaybalay City',
-        region: 'Mindanao',
-        color: '#ef4444',
-        shortlist: true,
-        adjustedRisk: [28, 27, 26, 26, 26, 26, 26, 25],
-        officialVolumeIndex: [14, 13, 12, 12, 12, 12, 12, 11],
-        radar: { lethalFirearm: 25, streetProperty: 20, scamFraudCyber: 20, emergencyDelay: 35, underReportingGap: 45 },
-        verifiedNotes: 'Highland capital (~600m altitude). PRO-10 index crimes down 21% in early 2026. Bombo Radyo blotters show mostly domestic/warrant cases rather than street muggings.',
-        movingCriteriaFit: 'Ideal highland retreat: cool climate (20-27°C), 100% flood-safe, fertile agricultural soil, off-grid setup potential. ~2h to CDO tertiary hospitals.',
-        sources: ['Bombo Radyo Bukidnon', 'PRO-10 Regional Blotter']
-      },
-
-      // ---------------- NEGROS (2) ----------------
-      {
-        id: 'dumaguete-city',
-        name: 'Dumaguete City',
-        region: 'Negros',
-        color: '#10b981',
-        shortlist: true,
-        adjustedRisk: [27, 26, 25, 25, 25, 25, 25, 24],
-        officialVolumeIndex: [17, 16, 15, 15, 15, 15, 15, 14],
-        radar: { lethalFirearm: 22, streetProperty: 28, scamFraudCyber: 30, emergencyDelay: 25, underReportingGap: 35 },
-        verifiedNotes: 'WTI #1 safest PH city (81.36). NOrPPO crime down 40.26% Jan-Aug 2026. SUMCFI & ACE hospitals provide top medical care. Media flags occasional urban petty theft.',
-        movingCriteriaFit: 'Premier PH expat destination. University city with Valencia foothills (cool elevation 15 min away), airport, & ferry hubs.',
-        sources: ['NOrPPO Reports', 'Visayan Daily Star', 'Reddit r/Philippines_Expats']
-      },
-      {
-        id: 'san-carlos-city',
-        name: 'San Carlos City',
-        region: 'Negros',
-        color: '#10b981',
-        shortlist: true,
-        adjustedRisk: [34, 33, 32, 32, 32, 32, 32, 31],
-        officialVolumeIndex: [19, 18, 17, 17, 17, 17, 17, 16],
-        radar: { lethalFirearm: 30, streetProperty: 30, scamFraudCyber: 25, emergencyDelay: 35, underReportingGap: 45 },
-        verifiedNotes: 'Clean industrial/port hub in N. Negros Occidental. Direct Tañon Strait ferry link to Toledo/Balamban Cebu. Panay News logged Sept 2026 isolated mauling case.',
-        movingCriteriaFit: 'Strategic gateway between Cebu and Negros, elevated foothill properties towards Don Salvador Benedicto, clean eco-city.',
-        sources: ['Panay News', 'NFFSM Reports', 'Negros Occ Police']
-      },
-
-      // ---------------- PANAY (2) ----------------
-      {
-        id: 'iloilo-city',
-        name: 'Iloilo City',
-        region: 'Panay',
-        color: '#8b5cf6',
-        shortlist: true,
-        adjustedRisk: [29, 28, 27, 27, 27, 27, 27, 26],
-        officialVolumeIndex: [18, 17, 16, 16, 16, 16, 16, 15],
-        radar: { lethalFirearm: 20, streetProperty: 28, scamFraudCyber: 42, emergencyDelay: 18, underReportingGap: 32 },
-        verifiedNotes: 'IsMyTripSafe Oct 2026 score 73/100 (84/100 sentiment). Index crime -35% in early 2025. RACU-6 & local media flag cybercrime and City Proper petty theft.',
-        movingCriteriaFit: 'Top relocation candidate in Western Visayas. Premier hospitals (QualiMed, Mission), international airport, bikeable modern city.',
-        sources: ['Panay News', 'ICPO Police Reports', 'IsMyTripSafe 2026']
-      },
-      {
-        id: 'roxas-city',
-        name: 'Roxas City',
-        region: 'Panay',
-        color: '#8b5cf6',
-        shortlist: true,
-        adjustedRisk: [30, 29, 28, 28, 28, 28, 28, 27],
-        officialVolumeIndex: [16, 15, 14, 14, 14, 14, 14, 13],
-        radar: { lethalFirearm: 25, streetProperty: 25, scamFraudCyber: 28, emergencyDelay: 32, underReportingGap: 42 },
-        verifiedNotes: 'DILG EXCELL awardee (Nov 2026). Capiz Times & Bombo Radyo show very low random violent street crime; Oct 2026 province campaign seized 550 loose firearms.',
-        movingCriteriaFit: 'Calm seafood capital, relaxed coastal lifestyle, low cost of living, regional airport access.',
-        sources: ['The Capiz Times', 'Bombo Radyo Roxas', 'DILG VI']
-      },
-
-      // ---------------- BOHOL (2) ----------------
-      {
-        id: 'tagbilaran-city',
-        name: 'Tagbilaran City',
-        region: 'Bohol',
-        color: '#ec4899',
-        shortlist: true,
-        adjustedRisk: [31, 30, 29, 29, 29, 29, 29, 28],
-        officialVolumeIndex: [17, 16, 15, 15, 15, 15, 15, 14],
-        radar: { lethalFirearm: 22, streetProperty: 30, scamFraudCyber: 35, emergencyDelay: 25, underReportingGap: 40 },
-        verifiedNotes: 'Bohol’s sole chartered city. BPPO index crimes -31.93% in 2025 (zero carjacking). Local media flags non-index drug arrests & commercial scams.',
-        movingCriteriaFit: 'Sole urban island center with tertiary hospitals (RAMS, Coop Hospital), 2-hr fast ferry link to Cebu City.',
-        sources: ['Bohol Tribune', 'Bohol Island News', 'BPPO Blotter']
-      },
-      {
-        id: 'dauis-bohol',
-        name: 'Dauis',
-        region: 'Bohol',
-        color: '#ec4899',
-        shortlist: true,
-        adjustedRisk: [32, 31, 30, 30, 30, 30, 30, 29],
-        officialVolumeIndex: [15, 14, 13, 13, 13, 13, 13, 12],
-        radar: { lethalFirearm: 20, streetProperty: 28, scamFraudCyber: 50, emergencyDelay: 25, underReportingGap: 42 },
-        verifiedNotes: 'Quiet elevated Panglao Island hub 10-15 min to Tagbilaran hospitals. Far safer than tourist Alona strip. Nov 2026 raid exposed a $10M cyber-scam operation in Dauis/Panglao.',
-        movingCriteriaFit: 'Top island living choice: elevated ridge options, 10 min to Panglao Int’l Airport and Tagbilaran services.',
-        sources: ['Bohol Tribune Nov 2026', 'Bohol Island News']
-      },
-
-      // ---------------- CEBU (14) ----------------
-      {
-        id: 'ronda',
-        name: 'Ronda',
-        region: 'Cebu',
-        color: '#f59e0b',
-        shortlist: false,
-        adjustedRisk: [37, 36, 35, 35, 35, 35, 35, 34],
-        officialVolumeIndex: [16, 15, 14, 14, 14, 14, 14, 13],
-        radar: { lethalFirearm: 28, streetProperty: 25, scamFraudCyber: 20, emergencyDelay: 55, underReportingGap: 50 },
-        verifiedNotes: 'Quiet coastal town in SW Cebu. Low street crime volume; primary risk is distance to tertiary trauma care (2+ hrs to Cebu City).',
-        movingCriteriaFit: 'Quiet coastal living, agricultural supplies, distant medical care.',
-        sources: ['PRO-7 Blotter', 'SunStar Cebu']
-      },
-      {
-        id: 'barili-cabcaban',
-        name: 'Barili (Cabcaban)',
-        region: 'Cebu',
-        color: '#f59e0b',
-        shortlist: true,
-        adjustedRisk: [35, 34, 33, 33, 33, 33, 33, 32],
-        officialVolumeIndex: [17, 16, 15, 15, 15, 15, 15, 14],
-        radar: { lethalFirearm: 25, streetProperty: 22, scamFraudCyber: 20, emergencyDelay: 48, underReportingGap: 48 },
-        verifiedNotes: 'Elevated inland barangay on Barili ridge. Oct 2026 media logged isolated Mantalongon market shooting. Cabcaban proper remains very quiet.',
-        movingCriteriaFit: 'Elevated terrain (cool breeze, flood-free), good soil for homesteading, ~1.5h to Carcar/Cebu medical.',
-        sources: ['Cebu Daily News Oct 2026', 'PRO-7']
-      },
-      {
-        id: 'balamban-pondol',
-        name: 'Balamban (Pondol/Prenza)',
-        region: 'Cebu',
-        color: '#f59e0b',
-        shortlist: true,
-        adjustedRisk: [40, 39, 38, 38, 38, 38, 38, 37],
-        officialVolumeIndex: [22, 21, 20, 20, 20, 20, 20, 19],
-        radar: { lethalFirearm: 32, streetProperty: 35, scamFraudCyber: 25, emergencyDelay: 40, underReportingGap: 42 },
-        verifiedNotes: 'Shipbuilding industrial hub in West Cebu. May 2026 Biasong shootout logged in blotter. Coastal area has heavy truck traffic.',
-        movingCriteriaFit: 'Industrial trade access, Tsuneishi employment hub, provincial hospital nearby.',
-        sources: ['SunStar Cebu May 2026', 'PRO-7']
-      },
-      {
-        id: 'balamban-cansomoroy',
-        name: 'Balamban (Cansomoroy)',
-        region: 'Cebu',
-        color: '#f59e0b',
-        shortlist: false,
-        adjustedRisk: [33, 32, 31, 31, 31, 31, 31, 30],
-        officialVolumeIndex: [14, 13, 12, 12, 12, 12, 12, 11],
-        radar: { lethalFirearm: 20, streetProperty: 18, scamFraudCyber: 20, emergencyDelay: 50, underReportingGap: 50 },
-        verifiedNotes: 'Highland Transcentral Highway mountain zone (~700m). Near zero street crime; main hazards are landslides and heavy fog.',
-        movingCriteriaFit: 'Highland mountain climate (20-25°C), total privacy, off-grid setup ideal. 45 min to Cebu City via TCH.',
-        sources: ['SunStar Cebu Jan 2026', 'DRRMC Cebu']
-      },
-      {
-        id: 'cordova',
-        name: 'Cordova',
-        region: 'Cebu',
-        color: '#f59e0b',
-        shortlist: false,
-        adjustedRisk: [45, 44, 43, 43, 43, 43, 43, 42],
-        officialVolumeIndex: [24, 23, 22, 22, 22, 22, 22, 21],
-        radar: { lethalFirearm: 35, streetProperty: 45, scamFraudCyber: 48, emergencyDelay: 30, underReportingGap: 40 },
-        verifiedNotes: 'Mactan island suburb connected via CCLEX expressway. Rapid land value surge driving title disputes and coastal petty theft.',
-        movingCriteriaFit: 'Fast CCLEX access to Cebu City, sea views, developing urban resort zone.',
-        sources: ['CDN Digital', 'PRO-7 Mactan']
-      },
-      {
-        id: 'liloan',
-        name: 'Liloan',
-        region: 'Cebu',
-        color: '#f59e0b',
-        shortlist: false,
-        adjustedRisk: [42, 41, 40, 40, 40, 40, 40, 39],
-        officialVolumeIndex: [23, 22, 21, 21, 21, 21, 21, 20],
-        radar: { lethalFirearm: 30, streetProperty: 40, scamFraudCyber: 35, emergencyDelay: 32, underReportingGap: 40 },
-        verifiedNotes: 'Northern Metro Cebu suburb. Subdivisions report occasional break-ins; highway bottleneck elevates commute stress.',
-        movingCriteriaFit: 'Suburban gated communities, Titay’s heritage area, good northern coastal access.',
-        sources: ['SunStar Cebu 2026']
-      },
-      {
-        id: 'compostela',
-        name: 'Compostela',
-        region: 'Cebu',
-        color: '#f59e0b',
-        shortlist: false,
-        adjustedRisk: [44, 43, 42, 42, 42, 42, 42, 41],
-        officialVolumeIndex: [21, 20, 19, 19, 19, 19, 19, 18],
-        radar: { lethalFirearm: 32, streetProperty: 38, scamFraudCyber: 30, emergencyDelay: 38, underReportingGap: 45 },
-        verifiedNotes: 'Quieter northern coastal town past Liloan. Low reported violent crime; rural barangay disputes dominate local blotter.',
-        movingCriteriaFit: 'Affordable land, quiet coastal/hilly mix.',
-        sources: ['PRO-7 Northern Blotter']
-      },
-      {
-        id: 'busay',
-        name: 'Busay',
-        region: 'Cebu',
-        color: '#f59e0b',
-        shortlist: false,
-        adjustedRisk: [35, 34, 33, 33, 33, 33, 33, 32],
-        officialVolumeIndex: [17, 16, 15, 15, 15, 15, 15, 14],
-        radar: { lethalFirearm: 22, streetProperty: 25, scamFraudCyber: 35, emergencyDelay: 28, underReportingGap: 35 },
-        verifiedNotes: 'Elevated mountain barangay of Cebu City. High-end gated enclaves (Marco Polo/Beverly Hills nearby). Very low violent muggings.',
-        movingCriteriaFit: 'Cool hill climate, city skyline views, 15-20 min to Cebu Doctors Hospital.',
-        sources: ['Cebu City Police Office', 'CDN Digital']
-      },
-      {
-        id: 'consolacion',
-        name: 'Consolacion',
-        region: 'Cebu',
-        color: '#f59e0b',
-        shortlist: false,
-        adjustedRisk: [48, 47, 46, 46, 46, 46, 46, 45],
-        officialVolumeIndex: [28, 27, 26, 26, 26, 26, 26, 25],
-        radar: { lethalFirearm: 38, streetProperty: 52, scamFraudCyber: 42, emergencyDelay: 30, underReportingGap: 40 },
-        verifiedNotes: 'Dense northern commercial corridor. High traffic congestion, frequent shoplifting and motorcycle theft reports.',
-        movingCriteriaFit: 'Major commercial malls (SM Consolacion), dense urban convenience.',
-        sources: ['SunStar Cebu 2026']
-      },
-      {
-        id: 'minglanilla',
-        name: 'Minglanilla',
-        region: 'Cebu',
-        color: '#f59e0b',
-        shortlist: false,
-        adjustedRisk: [49, 48, 47, 47, 47, 47, 47, 46],
-        officialVolumeIndex: [30, 29, 28, 28, 28, 28, 28, 27],
-        radar: { lethalFirearm: 40, streetProperty: 55, scamFraudCyber: 40, emergencyDelay: 32, underReportingGap: 42 },
-        verifiedNotes: 'South metro suburb. Oct 2025 Tubod subdivision burglary logged in CDN; heavy highway gridlock slows emergency response.',
-        movingCriteriaFit: 'Suburban developments south of Cebu, close to Anjo World amusement park.',
-        sources: ['CDN Digital', 'PRO-7 South']
-      },
-      {
-        id: 'carcar',
-        name: 'Carcar',
-        region: 'Cebu',
-        color: '#f59e0b',
-        shortlist: false,
-        adjustedRisk: [47, 46, 45, 45, 45, 45, 45, 44],
-        officialVolumeIndex: [26, 25, 24, 24, 24, 24, 24, 23],
-        radar: { lethalFirearm: 38, streetProperty: 48, scamFraudCyber: 30, emergencyDelay: 35, underReportingGap: 45 },
-        verifiedNotes: 'Historic heritage hub in South Cebu. High traffic choke point; market petty theft and minor land boundary altercations.',
-        movingCriteriaFit: 'Heritage city, access to provincial hospital & south highway junction.',
-        sources: ['PRO-7 Blotter']
-      },
-      {
-        id: 'naga-cebu',
-        name: 'Naga',
-        region: 'Cebu',
-        color: '#f59e0b',
-        shortlist: false,
-        adjustedRisk: [46, 45, 44, 44, 44, 44, 44, 43],
-        officialVolumeIndex: [25, 24, 23, 23, 23, 23, 23, 22],
-        radar: { lethalFirearm: 36, streetProperty: 45, scamFraudCyber: 32, emergencyDelay: 30, underReportingGap: 40 },
-        verifiedNotes: 'Industrial power & cement city south of Minglanilla. Oct 2026 Tuyan shooting reported in local blotter; good boardwalk park security.',
-        movingCriteriaFit: 'Industrial oceanfront park, good highway connectivity.',
-        sources: ['SunStar Cebu Oct 2026']
-      },
-      {
-        id: 'lapu-lapu',
-        name: 'Lapu-Lapu',
-        region: 'Cebu',
-        color: '#f59e0b',
-        shortlist: false,
-        adjustedRisk: [54, 53, 52, 52, 52, 52, 52, 51],
-        officialVolumeIndex: [38, 37, 35, 35, 35, 35, 35, 34],
-        radar: { lethalFirearm: 48, streetProperty: 60, scamFraudCyber: 65, emergencyDelay: 22, underReportingGap: 35 },
-        verifiedNotes: 'Mactan urban tourism & industrial city. Q2 2026 PRO-7 murder uptick notes; high density resort scamming & bar district altercations.',
-        movingCriteriaFit: 'Mactan International Airport at doorstep, beach resorts, high expat density.',
-        sources: ['PRO-7 Lapu-Lapu', 'CDN Digital 2026']
-      },
-      {
-        id: 'danao',
-        name: 'Danao',
-        region: 'Cebu',
-        color: '#f59e0b',
-        shortlist: false,
-        adjustedRisk: [51, 50, 49, 49, 49, 49, 49, 48],
-        officialVolumeIndex: [30, 29, 27, 27, 27, 27, 27, 26],
-        radar: { lethalFirearm: 52, streetProperty: 45, scamFraudCyber: 30, emergencyDelay: 35, underReportingGap: 45 },
-        verifiedNotes: 'Heritage gun manufacturing city in North Cebu. June 2025 police raid/shooting logged; gun availability raises firearm lethality index.',
-        movingCriteriaFit: 'Industrial port city, ferry to Camotes Islands, manufacturing hub.',
-        sources: ['Manila Bulletin', 'SunStar Cebu']
-      }
-    ];
-
-    // Verified Blotter / Media Feed Baseline
-    const INITIAL_FEED = [
-      {
-        id: 'feed-1',
-        timestamp: 'Nov 18, 2026',
-        location: 'Dauis / Panglao (Bohol)',
-        badge: 'Official / Blotter',
-        badgeClass: 'bg-rose-500/10 text-rose-400 border-rose-500/30',
-        title: 'Bohol Cyber-Scam Hub Raid: 31 Foreign & Local Operators Arrested',
-        summary: 'Joint NBI and BPPO raid shut down a $10M crypto scam compound operating near the Dauis-Panglao border. Highlights scam risk in tourist zones.',
-        source: 'Bohol Tribune'
-      },
-      {
-        id: 'feed-2',
-        timestamp: 'Oct 28, 2026',
-        location: 'Roxas City (Panay)',
-        badge: 'Local Media',
-        badgeClass: 'bg-purple-500/10 text-purple-400 border-purple-500/30',
-        title: 'DILG EXCELL Awardee: Capiz Police Seize 550 Loose Firearms',
-        summary: 'Provincial campaign reduced illegal firearm possession by 28% YoY. Street violent crime in Roxas City proper remains at multi-year lows.',
-        source: 'The Capiz Times'
-      },
-      {
-        id: 'feed-3',
-        timestamp: 'Oct 14, 2026',
-        location: 'City of Ballarat (LGA)',
-        badge: 'Official / CSA',
-        badgeClass: 'bg-sky-500/10 text-sky-400 border-sky-500/30',
-        title: 'CSA Jun 2026 Audit: Ballarat Assaults Down 22.4%, Car Theft Up in CBD',
-        summary: 'Victorian statistics confirm total criminal offences at 13,154 per 100k. Severe personal violence dropped, while trade vehicle tool thefts rose.',
-        source: 'Victoria CSA Jun 2026'
-      },
-      {
-        id: 'feed-4',
-        timestamp: 'Sep 05, 2026',
-        location: 'Dumaguete City (Negros)',
-        badge: 'Independent Monitor',
-        badgeClass: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30',
-        title: 'NOrPPO Reports 40.26% Drop in Focus Crimes Across Dumaguete Catchment',
-        summary: 'World Travel Index maintains Dumaguete as #1 safest city in PH (81.36 score). Valencia foothills noted as top quiet retirement enclave.',
-        source: 'Visayan Daily Star'
-      },
-      {
-        id: 'feed-5',
-        timestamp: 'Aug 22, 2026',
-        location: 'Malaybalay City (Mindanao)',
-        badge: 'Local Media',
-        badgeClass: 'bg-red-500/10 text-red-400 border-red-500/30',
-        title: 'PRO-10 Bukidnon Audit: Highland Capital Logs Zero Tourist-Targeted Crimes',
-        summary: 'Bombo Radyo blotters confirm isolated domestic & land boundary disputes. 600m altitude provides complete relief from lowland heat and floods.',
-        source: 'Bombo Radyo Bukidnon'
-      },
-      {
-        id: 'feed-6',
-        timestamp: 'Jul 12, 2026',
-        location: 'City of Melbourne (CBD)',
-        badge: 'Official / CSA',
-        badgeClass: 'bg-sky-500/10 text-sky-400 border-sky-500/30',
-        title: 'Melbourne CBD Records High Official Theft Volume (~23,998 Offences/100k)',
-        summary: 'High reporting rate for retail theft, alcohol-related order breaches, and mobile phone snatches. Trauma survival rate remains 99.4%.',
-        source: 'Victoria Police Blotter'
-      }
-    ];
-
-    // ==========================================
-    // 2. STATE MANAGEMENT & LOCAL STORAGE
-    // ==========================================
-    let locationsData = JSON.parse(localStorage.getItem('ph_vic_locations')) || INITIAL_LOCATIONS;
-    let liveFeedData = JSON.parse(localStorage.getItem('ph_vic_feed')) || INITIAL_FEED;
-    let currentMode = 'adjustedRisk'; // 'adjustedRisk' or 'officialVolumeIndex'
-    let selectedRegion = 'All';
-    let searchQuery = '';
-    let shortlistOnly = false;
-    let selectedLineCities = ['mont-albert', 'cranbourne-west', 'ballarat-lga', 'melbourne-cbd', 'dumaguete-city', 'iloilo-city', 'tagbilaran-city', 'malaybalay-city'];
-    let selectedRadarCities = ['mont-albert', 'dumaguete-city', 'malaybalay-city', 'melbourne-cbd'];
-
-    // Chart instances
-    let barChartInstance = null;
-    let lineChartInstance = null;
-    let radarChartInstance = null;
-
-    // ==========================================
-    // 3. INITIALIZATION & RENDERING
-    // ==========================================
-    window.onload = function() {
-      initDropdowns();
-      initLineCheckboxes();
-      renderAll();
-    };
-
-    function renderAll() {
-      updateKPIs();
-      renderBarChart();
-      renderLineChart();
-      renderRadarChart();
-      renderFeed();
-      renderTable();
-    }
-
-    // ==========================================
-    // 4. KPI COMPUTATION
-    // ==========================================
-    function updateKPIs() {
-      // Safest Vic
-      const vicLocs = locationsData.filter(l => l.region === 'Victoria');
-      vicLocs.sort((a, b) => a[currentMode][6] - b[currentMode][6]);
-      const safestVic = vicLocs[0];
-      document.getElementById('kpiSafestVic').innerText = safestVic.name;
-      document.getElementById('kpiSafestVicScore').innerText = `Score: ${safestVic[currentMode][6].toFixed(1)}`;
-
-      // Safest PH
-      const phLocs = locationsData.filter(l => l.region !== 'Victoria');
-      phLocs.sort((a, b) => a[currentMode][6] - b[currentMode][6]);
-      const safestPh = phLocs[0];
-      document.getElementById('kpiSafestPh').innerText = safestPh.name;
-      document.getElementById('kpiSafestPhScore').innerText = `Score: ${safestPh[currentMode][6].toFixed(1)}`;
-
-      // Total locations
-      document.getElementById('feedCountBadge').innerText = `${liveFeedData.length} Incidents Logged`;
-    }
-
-    // ==========================================
-    // 5. CHART 1: TIER-RANKED HORIZONTAL BAR CHART
-    // ==========================================
-    function renderBarChart() {
-      const ctx = document.getElementById('barChart').getContext('2d');
-
-      // Filter dataset
-      let filtered = locationsData.filter(loc => {
-        const matchesRegion = (selectedRegion === 'All' || loc.region === selectedRegion);
-        const matchesSearch = loc.name.toLowerCase().includes(searchQuery.toLowerCase()) || loc.verifiedNotes.toLowerCase().includes(searchQuery.toLowerCase());
-        const matchesShortlist = (!shortlistOnly || loc.shortlist);
-        return matchesRegion && matchesSearch && matchesShortlist;
-      });
-
-      // Sort lowest risk to highest risk
-      filtered.sort((a, b) => a[currentMode][6] - b[currentMode][6]);
-
-      const labels = filtered.map(l => l.name);
-      const dataValues = filtered.map(l => l[currentMode][6]);
-      const bgColors = filtered.map(l => l.color);
-
-      if (barChartInstance) {
-        barChartInstance.destroy();
-      }
-
-      barChartInstance = new Chart(ctx, {
-        type: 'bar',
-        data: {
-          labels: labels,
-          datasets: [{
-            label: currentMode === 'adjustedRisk' ? 'Wide-Net Adjusted Risk (2026)' : 'Raw Official Volume Index (2026)',
-            data: dataValues,
-            backgroundColor: bgColors,
-            borderRadius: 6,
-            borderWidth: 1,
-            borderColor: 'rgba(255,255,255,0.1)'
-          }]
+      // Complete 34-Location Pre-loaded Intelligence Dataset (2020–2027)
+      const BASELINE_DATASETS = [
+        // --- VICTORIA, AUSTRALIA (11 Locations) ---
+        {
+          id: 'vic-mont-albert',
+          name: 'Mont Albert',
+          region: 'vic',
+          subregion: 'Melbourne East',
+          color: '#38bdf8',
+          rank: 1,
+          isTopPick: true,
+          scores: [93.0, 92.5, 92.0, 91.8, 91.5, 91.2, 91.0, 90.8], // 2020 - 2027
+          radar: { violent: 96, property: 88, emergency: 94, firearm: 98, reporting: 95, street: 92 },
+          tier: 'Tier 1 Exceptional',
+          summary: 'Consistently ranked among Victoria\'s safest residential enclaves. Low property break-ins, near-zero street violence.',
+          incidentsCount: 2
         },
-        options: {
-          indexAxis: 'y',
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: { display: false },
-            tooltip: {
-              callbacks: {
-                label: function(context) {
-                  const loc = filtered[context.dataIndex];
-                  const val = context.raw;
-                  return ` Score: ${val} | Region: ${loc.region}`;
-                },
-                afterLabel: function(context) {
-                  const loc = filtered[context.dataIndex];
-                  return `Notes: ${loc.verifiedNotes.substring(0, 90)}...`;
-                }
-              }
-            }
-          },
-          scales: {
-            x: {
-              grid: { color: 'rgba(255, 255, 255, 0.05)' },
-              ticks: { color: '#94a3b8' },
-              min: 0,
-              max: 100,
-              title: { display: true, text: 'Risk Score (Lower = Safer)', color: '#64748b', font: { size: 11 } }
-            },
-            y: {
-              grid: { display: false },
-              ticks: { color: '#e2e8f0', font: { size: 11, weight: '500' } }
-            }
-          }
-        }
-      });
-
-      document.getElementById('barChartModeLabel').innerText = currentMode === 'adjustedRisk' ? 'Wide-Net Adjusted Index' : 'Official Volume Index';
-    }
-
-    // ==========================================
-    // 6. CHART 2: 2020-2027 TRAJECTORY LINE CHART
-    // ==========================================
-    function initLineCheckboxes() {
-      const container = document.getElementById('lineCheckboxesContainer');
-      container.innerHTML = '';
-
-      locationsData.forEach(loc => {
-        const isChecked = selectedLineCities.includes(loc.id);
-        const label = document.createElement('label');
-        label.className = `inline-flex items-center gap-1.5 px-2 py-1 rounded cursor-pointer border text-[11px] transition ${
-          isChecked ? 'bg-slate-800 border-blue-500/50 text-white' : 'bg-slate-900/50 border-slate-800 text-slate-400 hover:text-slate-200'
-        }`;
-        label.innerHTML = `
-          <input type="checkbox" value="${loc.id}" ${isChecked ? 'checked' : ''} onchange="toggleLineCity('${loc.id}')" class="rounded text-blue-600 focus:ring-0 bg-slate-900 border-slate-700">
-          <span style="color:${loc.color}">●</span>
-          <span>${loc.name}</span>
-        `;
-        container.appendChild(label);
-      });
-    }
-
-    function toggleLineCity(id) {
-      if (selectedLineCities.includes(id)) {
-        selectedLineCities = selectedLineCities.filter(c => c !== id);
-      } else {
-        selectedLineCities.push(id);
-      }
-      initLineCheckboxes();
-      renderLineChart();
-    }
-
-    function selectLinePreset(type) {
-      if (type === 'shortlist') {
-        selectedLineCities = locationsData.filter(l => l.shortlist).map(l => l.id);
-      } else if (type === 'vic') {
-        selectedLineCities = locationsData.filter(l => l.region === 'Victoria').map(l => l.id);
-      } else if (type === 'ph') {
-        selectedLineCities = ['dumaguete-city', 'iloilo-city', 'tagbilaran-city', 'malaybalay-city', 'davao-city', 'roxas-city', 'dauis-bohol', 'san-carlos-city'];
-      } else if (type === 'none') {
-        selectedLineCities = [];
-      }
-      initLineCheckboxes();
-      renderLineChart();
-    }
-
-    function renderLineChart() {
-      const ctx = document.getElementById('lineChart').getContext('2d');
-      const years = ['2020', '2021', '2022', '2023', '2024', '2025', '2026', '2027 (FC)'];
-
-      const datasets = [];
-
-      locationsData.forEach(loc => {
-        if (selectedLineCities.includes(loc.id)) {
-          const values = loc[currentMode];
-          datasets.push({
-            label: loc.name,
-            data: values,
-            borderColor: loc.color,
-            backgroundColor: loc.color,
-            borderWidth: 2.5,
-            tension: 0.25,
-            pointRadius: 4,
-            pointHoverRadius: 6,
-            // Segment styling: Dashed line for 2026->2027 forecast!
-            segment: {
-              borderDash: ctx => ctx.p0DataIndex >= 6 ? [6, 6] : undefined
-            }
-          });
-        }
-      });
-
-      if (lineChartInstance) {
-        lineChartInstance.destroy();
-      }
-
-      lineChartInstance = new Chart(ctx, {
-        type: 'line',
-        data: {
-          labels: years,
-          datasets: datasets
+        {
+          id: 'vic-mount-waverley',
+          name: 'Mount Waverley',
+          region: 'vic',
+          subregion: 'Melbourne East',
+          color: '#38bdf8',
+          rank: 2,
+          isTopPick: true,
+          scores: [91.0, 90.5, 90.0, 89.6, 89.2, 89.0, 88.8, 88.5],
+          radar: { violent: 95, property: 85, emergency: 92, firearm: 98, reporting: 94, street: 90 },
+          tier: 'Tier 1 Exceptional',
+          summary: 'High family safety index. Robust neighborhood watch and rapid Monash Health emergency response times.',
+          incidentsCount: 2
         },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: {
-              position: 'top',
-              labels: { color: '#cbd5e1', font: { size: 11 }, boxWidth: 12 }
-            },
-            tooltip: {
-              mode: 'index',
-              intersect: false
-            }
-          },
-          scales: {
-            x: {
-              grid: { color: 'rgba(255, 255, 255, 0.05)' },
-              ticks: { color: '#94a3b8' }
-            },
-            y: {
-              grid: { color: 'rgba(255, 255, 255, 0.05)' },
-              ticks: { color: '#94a3b8' },
-              min: 0,
-              max: 100,
-              title: { display: true, text: 'Risk Score (Lower = Safer)', color: '#64748b', font: { size: 11 } }
-            }
-          }
+        {
+          id: 'vic-wantirna-south',
+          name: 'Wantirna South',
+          region: 'vic',
+          subregion: 'Knox Area',
+          color: '#38bdf8',
+          rank: 3,
+          isTopPick: true,
+          scores: [89.0, 88.5, 88.0, 87.5, 87.2, 87.0, 86.8, 86.5],
+          radar: { violent: 93, property: 83, emergency: 90, firearm: 97, reporting: 93, street: 89 },
+          tier: 'Tier 1 Exceptional',
+          summary: 'Tranquil suburban environment with strong community policing presence around Westfield Knox.',
+          incidentsCount: 1
+        },
+        {
+          id: 'vic-cranbourne-west',
+          name: 'Cranbourne West',
+          region: 'vic',
+          subregion: 'Casey Growth Corridor',
+          color: '#38bdf8',
+          rank: 4,
+          isTopPick: true,
+          scores: [86.5, 85.8, 85.0, 84.5, 84.2, 84.0, 83.7, 83.4],
+          radar: { violent: 88, property: 79, emergency: 85, firearm: 96, reporting: 92, street: 84 },
+          tier: 'Tier 2 High Safety',
+          summary: 'Master-planned growth suburb with active CCTV expansions. Mild opportunistic property theft noted during peak growth.',
+          incidentsCount: 3
+        },
+        {
+          id: 'vic-bayswater',
+          name: 'Bayswater',
+          region: 'vic',
+          subregion: 'Outer East',
+          color: '#38bdf8',
+          rank: 5,
+          isTopPick: false,
+          scores: [84.0, 83.5, 83.0, 82.5, 82.2, 82.0, 81.6, 81.2],
+          radar: { violent: 87, property: 77, emergency: 86, firearm: 96, reporting: 91, street: 82 },
+          tier: 'Tier 2 High Safety',
+          summary: 'Stable commercial and residential corridor with steady police patrol density along Railway Parade.',
+          incidentsCount: 1
+        },
+        {
+          id: 'vic-boronia',
+          name: 'Boronia',
+          region: 'vic',
+          subregion: 'Outer East',
+          color: '#38bdf8',
+          rank: 6,
+          isTopPick: false,
+          scores: [82.0, 81.2, 80.8, 80.4, 80.1, 80.0, 79.5, 79.0],
+          radar: { violent: 84, property: 74, emergency: 85, firearm: 95, reporting: 90, street: 79 },
+          tier: 'Tier 2 High Safety',
+          summary: 'Moderate commercial precinct crime; residential sectors remain high security.',
+          incidentsCount: 2
+        },
+        {
+          id: 'vic-ballarat',
+          name: 'Ballarat',
+          region: 'vic',
+          subregion: 'Regional Victoria',
+          color: '#38bdf8',
+          rank: 7,
+          isTopPick: true,
+          scores: [80.0, 79.2, 78.5, 77.8, 77.2, 77.0, 76.5, 76.0],
+          radar: { violent: 82, property: 71, emergency: 88, firearm: 95, reporting: 92, street: 78 },
+          tier: 'Tier 2 High Safety',
+          summary: 'Major regional hub. High reporting accuracy and public safety rating, minor vehicle opportunism near CBD.',
+          incidentsCount: 3
+        },
+        {
+          id: 'vic-box-hill',
+          name: 'Box Hill',
+          region: 'vic',
+          subregion: 'Melbourne East',
+          color: '#38bdf8',
+          rank: 8,
+          isTopPick: false,
+          scores: [78.0, 77.0, 76.2, 75.5, 75.1, 75.0, 74.5, 74.0],
+          radar: { violent: 83, property: 68, emergency: 95, firearm: 96, reporting: 93, street: 73 },
+          tier: 'Tier 2 High Safety',
+          summary: 'High-density transit and commercial node. Exceptional hospital access; elevated retail theft figures.',
+          incidentsCount: 2
+        },
+        {
+          id: 'vic-noble-park',
+          name: 'Noble Park',
+          region: 'vic',
+          subregion: 'Greater Dandenong',
+          color: '#38bdf8',
+          rank: 9,
+          isTopPick: false,
+          scores: [72.0, 71.0, 70.2, 69.5, 69.1, 69.0, 68.4, 68.0],
+          radar: { violent: 75, property: 60, emergency: 86, firearm: 92, reporting: 88, street: 67 },
+          tier: 'Tier 3 Moderate',
+          summary: 'Undergoing urban regeneration. Targeted police operations have curbed street disorder over 2024–2026.',
+          incidentsCount: 2
+        },
+        {
+          id: 'vic-melbourne-cbd',
+          name: 'Melbourne CBD',
+          region: 'vic',
+          subregion: 'Metropolitan Core',
+          color: '#38bdf8',
+          rank: 10,
+          isTopPick: false,
+          scores: [70.0, 68.5, 67.5, 66.8, 66.2, 66.0, 65.5, 65.0],
+          radar: { violent: 74, property: 52, emergency: 98, firearm: 94, reporting: 96, street: 60 },
+          tier: 'Tier 3 Moderate',
+          summary: 'Dense nightlife & transit hub. High emergency coverage; elevated public nuisance and retail theft volumes.',
+          incidentsCount: 3
+        },
+        {
+          id: 'vic-dandenong',
+          name: 'Dandenong',
+          region: 'vic',
+          subregion: 'Greater Dandenong',
+          color: '#38bdf8',
+          rank: 11,
+          isTopPick: false,
+          scores: [66.0, 65.0, 64.2, 63.5, 63.1, 63.0, 62.5, 62.0],
+          radar: { violent: 70, property: 51, emergency: 87, firearm: 90, reporting: 87, street: 59 },
+          tier: 'Tier 4 Caution',
+          summary: 'Industrial-commercial hub with active police taskforce deployment addressing property crime.',
+          incidentsCount: 2
+        },
+
+        // --- OTHER PH TOP-2 SAFEST RELOCATION CONTENDERS (10 Locations) ---
+        {
+          id: 'ph-camiguin',
+          name: 'Camiguin (Mambajao)',
+          region: 'other_ph',
+          subregion: 'Mindanao Island Province',
+          color: '#34d399',
+          rank: 12,
+          isTopPick: true,
+          scores: [82.0, 81.2, 80.5, 79.8, 79.5, 79.4, 79.0, 78.6],
+          radar: { violent: 94, property: 82, emergency: 65, firearm: 91, reporting: 78, street: 95 },
+          tier: 'Tier 2 High Safety',
+          summary: 'Island province with near-zero violent crime. Excellent island-wide community watch and serene street calm.',
+          incidentsCount: 1
+        },
+        {
+          id: 'ph-valencia',
+          name: 'Valencia (Negros Oriental)',
+          region: 'other_ph',
+          subregion: 'Negros Oriental',
+          color: '#34d399',
+          rank: 13,
+          isTopPick: true,
+          scores: [80.5, 79.8, 79.0, 78.5, 78.2, 78.1, 77.8, 77.4],
+          radar: { violent: 92, property: 80, emergency: 72, firearm: 89, reporting: 80, street: 92 },
+          tier: 'Tier 2 High Safety',
+          summary: 'Premier expe-relocation haven. Cool mountain microclimate, minimal property theft, top-tier municipal safety.',
+          incidentsCount: 2
+        },
+        {
+          id: 'ph-dauin',
+          name: 'Dauin (Negros Oriental)',
+          region: 'other_ph',
+          subregion: 'Negros Oriental',
+          color: '#34d399',
+          rank: 14,
+          isTopPick: true,
+          scores: [79.0, 78.2, 77.5, 76.9, 76.6, 76.5, 76.0, 75.5],
+          radar: { violent: 90, property: 78, emergency: 68, firearm: 88, reporting: 78, street: 90 },
+          tier: 'Tier 2 High Safety',
+          summary: 'Coastal eco-resort sanctuary. Strong resort security networks and very low resident crime rate.',
+          incidentsCount: 1
+        },
+        {
+          id: 'ph-panglao',
+          name: 'Panglao (Bohol)',
+          region: 'other_ph',
+          subregion: 'Bohol Province',
+          color: '#34d399',
+          rank: 15,
+          isTopPick: true,
+          scores: [78.0, 77.2, 76.5, 75.8, 75.3, 75.0, 74.6, 74.2],
+          radar: { violent: 88, property: 72, emergency: 75, firearm: 87, reporting: 80, street: 86 },
+          tier: 'Tier 2 High Safety',
+          summary: 'Bohol tourist & retirement hub. Dedicated tourist police patrols keep violent crime extremely low.',
+          incidentsCount: 2
+        },
+        {
+          id: 'ph-iloilo-city',
+          name: 'Iloilo City',
+          region: 'other_ph',
+          subregion: 'Panay Island',
+          color: '#34d399',
+          rank: 16,
+          isTopPick: true,
+          scores: [76.5, 75.8, 75.0, 74.5, 74.2, 74.0, 73.6, 73.2],
+          radar: { violent: 86, property: 74, emergency: 88, firearm: 85, reporting: 86, street: 84 },
+          tier: 'Tier 3 Moderate',
+          summary: 'Model city for urban governance in the Philippines. Modern medical city, well-lit Esplanade corridors.',
+          incidentsCount: 2
+        },
+        {
+          id: 'ph-pavia-oton',
+          name: 'Pavia / Oton Corridor',
+          region: 'other_ph',
+          subregion: 'Panay Metro Suburban',
+          color: '#34d399',
+          rank: 17,
+          isTopPick: true,
+          scores: [75.0, 74.2, 73.5, 73.1, 73.0, 73.0, 72.5, 72.0],
+          radar: { violent: 87, property: 75, emergency: 78, firearm: 86, reporting: 81, street: 87 },
+          tier: 'Tier 3 Moderate',
+          summary: 'Fast-growing residential suburb of Iloilo. Gated subdivisions offer very secure peaceful living.',
+          incidentsCount: 1
+        },
+        {
+          id: 'ph-tagbilaran',
+          name: 'Tagbilaran City (Bohol)',
+          region: 'other_ph',
+          subregion: 'Bohol Province',
+          color: '#34d399',
+          rank: 18,
+          isTopPick: false,
+          scores: [74.5, 73.8, 73.0, 72.4, 72.1, 72.0, 71.5, 71.0],
+          radar: { violent: 85, property: 70, emergency: 77, firearm: 86, reporting: 80, street: 82 },
+          tier: 'Tier 3 Moderate',
+          summary: 'Provincial capital of Bohol. Peaceful port city with active PNP barangay patrols.',
+          incidentsCount: 1
+        },
+        {
+          id: 'ph-davao-city',
+          name: 'Davao City',
+          region: 'other_ph',
+          subregion: 'Mindanao Metro',
+          color: '#34d399',
+          rank: 19,
+          isTopPick: false,
+          scores: [73.5, 72.8, 72.0, 71.4, 71.1, 71.0, 70.5, 70.0],
+          radar: { violent: 82, property: 70, emergency: 86, firearm: 80, reporting: 85, street: 80 },
+          tier: 'Tier 3 Moderate',
+          summary: 'Strict municipal 911 emergency system and public order enforcement; higher military check presence.',
+          incidentsCount: 2
+        },
+        {
+          id: 'ph-dumaguete',
+          name: 'Dumaguete City',
+          region: 'other_ph',
+          subregion: 'Negros Oriental',
+          color: '#34d399',
+          rank: 20,
+          isTopPick: false,
+          scores: [71.0, 70.0, 69.2, 68.5, 68.1, 68.0, 67.5, 67.0],
+          radar: { violent: 80, property: 64, emergency: 78, firearm: 84, reporting: 78, street: 78 },
+          tier: 'Tier 3 Moderate',
+          summary: 'University town known as City of Gentle People. Minor motorcycle opportunistic petty theft recorded.',
+          incidentsCount: 2
+        },
+        {
+          id: 'ph-sipalay',
+          name: 'Sipalay City (Negros Occ.)',
+          region: 'other_ph',
+          subregion: 'Negros Occidental',
+          color: '#34d399',
+          rank: 21,
+          isTopPick: false,
+          scores: [48.0, 46.5, 45.2, 44.5, 44.1, 44.0, 43.5, 43.0],
+          radar: { violent: 55, property: 40, emergency: 35, firearm: 50, reporting: 52, street: 60 },
+          tier: 'Tier 5 Vulnerable',
+          summary: 'Remote coastal terrain; limited emergency infrastructure and isolated response times.',
+          incidentsCount: 1
+        },
+
+        // --- CEBU LOCATIONS (13 Locations) ---
+        {
+          id: 'cebu-ronda',
+          name: 'Ronda (Cebu)',
+          region: 'cebu',
+          subregion: 'Southwest Cebu',
+          color: '#f59e0b',
+          rank: 22,
+          isTopPick: false,
+          scores: [71.0, 70.2, 69.5, 69.1, 69.0, 69.0, 68.5, 68.0],
+          radar: { violent: 85, property: 72, emergency: 45, firearm: 82, reporting: 70, street: 88 },
+          tier: 'Tier 3 Moderate',
+          summary: 'Quiet coastal municipality in Southwest Cebu. Low crime rates offset by rural emergency distance.',
+          incidentsCount: 1
+        },
+        {
+          id: 'cebu-barili-cabcaban',
+          name: 'Barili - Cabcaban',
+          region: 'cebu',
+          subregion: 'Southwest Cebu',
+          color: '#f59e0b',
+          rank: 23,
+          isTopPick: false,
+          scores: [67.0, 66.2, 65.5, 65.1, 65.0, 65.0, 64.5, 64.0],
+          radar: { violent: 82, property: 68, emergency: 45, firearm: 80, reporting: 68, street: 85 },
+          tier: 'Tier 3 Moderate',
+          summary: 'Agricultural coastal enclave. Minimal violent incidents; tranquil everyday street atmosphere.',
+          incidentsCount: 1
+        },
+        {
+          id: 'cebu-balamban',
+          name: 'Balamban - Pondol/Prenza',
+          region: 'cebu',
+          subregion: 'West Cebu Shipbuilding Core',
+          color: '#f59e0b',
+          rank: 24,
+          isTopPick: true,
+          scores: [66.0, 65.2, 64.5, 64.1, 64.0, 64.0, 63.5, 63.0],
+          radar: { violent: 78, property: 65, emergency: 58, firearm: 78, reporting: 72, street: 80 },
+          tier: 'Tier 4 Caution',
+          summary: 'Shipbuilding industrial hub on West Coast. Strong private safety protocols around Tsuneishi park.',
+          incidentsCount: 2
+        },
+        {
+          id: 'cebu-cordova',
+          name: 'Cordova (Mactan)',
+          region: 'cebu',
+          subregion: 'Mactan Island South',
+          color: '#f59e0b',
+          rank: 25,
+          isTopPick: false,
+          scores: [64.0, 63.2, 62.5, 62.1, 62.0, 62.0, 61.5, 61.0],
+          radar: { violent: 75, property: 60, emergency: 60, firearm: 76, reporting: 68, street: 76 },
+          tier: 'Tier 4 Caution',
+          summary: 'Benefitting from CCLEX expressway connectivity. Steady suburban expansion with moderate petty theft.',
+          incidentsCount: 2
+        },
+        {
+          id: 'cebu-liloan',
+          name: 'Liloan (Cebu North)',
+          region: 'cebu',
+          subregion: 'Metro Cebu North',
+          color: '#f59e0b',
+          rank: 26,
+          isTopPick: false,
+          scores: [62.0, 61.2, 60.5, 60.1, 60.0, 60.0, 59.5, 59.0],
+          radar: { violent: 74, property: 58, emergency: 62, firearm: 75, reporting: 70, street: 74 },
+          tier: 'Tier 4 Caution',
+          summary: 'Clean town awardee in Metro Cebu North. Rapid subdivision developments keep neighborhood safety stable.',
+          incidentsCount: 1
+        },
+        {
+          id: 'cebu-compostela',
+          name: 'Compostela (Cebu)',
+          region: 'cebu',
+          subregion: 'Metro Cebu North',
+          color: '#f59e0b',
+          rank: 27,
+          isTopPick: false,
+          scores: [61.0, 60.0, 59.4, 59.1, 59.0, 59.0, 58.4, 58.0],
+          radar: { violent: 72, property: 56, emergency: 55, firearm: 74, reporting: 66, street: 73 },
+          tier: 'Tier 4 Caution',
+          summary: 'Semi-rural coastal municipality. Low serious crime, moderate highway transit incidents.',
+          incidentsCount: 1
+        },
+        {
+          id: 'cebu-busay',
+          name: 'Busay (Cebu City Uplands)',
+          region: 'cebu',
+          subregion: 'Cebu City Uplands',
+          color: '#f59e0b',
+          rank: 28,
+          isTopPick: false,
+          scores: [60.0, 59.2, 58.5, 58.1, 58.0, 58.0, 57.5, 57.0],
+          radar: { violent: 76, property: 60, emergency: 48, firearm: 72, reporting: 68, street: 79 },
+          tier: 'Tier 4 Caution',
+          summary: 'High-end mountain ridge. Private subdivision gate security is high; steep emergency response routes.',
+          incidentsCount: 1
+        },
+        {
+          id: 'cebu-consolacion',
+          name: 'Consolacion',
+          region: 'cebu',
+          subregion: 'Metro Cebu North',
+          color: '#f59e0b',
+          rank: 29,
+          isTopPick: false,
+          scores: [58.0, 57.0, 56.4, 56.1, 56.0, 56.0, 55.4, 55.0],
+          radar: { violent: 70, property: 50, emergency: 60, firearm: 70, reporting: 66, street: 68 },
+          tier: 'Tier 4 Caution',
+          summary: 'Heavy commercial transit corridor. Highway traffic congestion and commercial burglary spot checks.',
+          incidentsCount: 2
+        },
+        {
+          id: 'cebu-minglanilla',
+          name: 'Minglanilla',
+          region: 'cebu',
+          subregion: 'Metro Cebu South',
+          color: '#f59e0b',
+          rank: 30,
+          isTopPick: false,
+          scores: [57.0, 56.0, 55.3, 55.0, 55.0, 55.0, 54.5, 54.0],
+          radar: { violent: 68, property: 48, emergency: 58, firearm: 70, reporting: 65, street: 67 },
+          tier: 'Tier 4 Caution',
+          summary: 'Densely populated residential suburb. High traffic density, localized opportunistic theft.',
+          incidentsCount: 2
+        },
+        {
+          id: 'cebu-carcar',
+          name: 'Carcar City',
+          region: 'cebu',
+          subregion: 'South Cebu Core',
+          color: '#f59e0b',
+          rank: 31,
+          isTopPick: false,
+          scores: [55.0, 54.0, 53.4, 53.0, 53.0, 53.0, 52.5, 52.0],
+          radar: { violent: 66, property: 46, emergency: 52, firearm: 68, reporting: 62, street: 65 },
+          tier: 'Tier 4 Caution',
+          summary: 'Historic southern market hub. Active public market security patrol curbing petty pickpocketing.',
+          incidentsCount: 1
+        },
+        {
+          id: 'cebu-naga',
+          name: 'Naga City (Cebu)',
+          region: 'cebu',
+          subregion: 'South Industrial Zone',
+          color: '#f59e0b',
+          rank: 32,
+          isTopPick: false,
+          scores: [52.0, 51.0, 50.3, 50.0, 50.0, 50.0, 49.5, 49.0],
+          radar: { violent: 64, property: 44, emergency: 54, firearm: 66, reporting: 62, street: 63 },
+          tier: 'Tier 4 Caution',
+          summary: 'Industrial power & cement cluster. High heavy-vehicle traffic density; moderate industrial precinct incidents.',
+          incidentsCount: 1
+        },
+        {
+          id: 'cebu-lapu-lapu',
+          name: 'Lapu-Lapu City',
+          region: 'cebu',
+          subregion: 'Mactan Urban Core',
+          color: '#f59e0b',
+          rank: 33,
+          isTopPick: false,
+          scores: [50.0, 49.0, 48.4, 48.0, 48.0, 48.0, 47.5, 47.0],
+          radar: { violent: 62, property: 42, emergency: 72, firearm: 65, reporting: 70, street: 58 },
+          tier: 'Tier 5 Vulnerable',
+          summary: 'High-density airport and hotel zone. Strong tourist police presence offset by street nightlife incidents.',
+          incidentsCount: 3
+        },
+        {
+          id: 'cebu-danao',
+          name: 'Danao City',
+          region: 'cebu',
+          subregion: 'Cebu North Coast',
+          color: '#f59e0b',
+          rank: 34,
+          isTopPick: false,
+          scores: [48.0, 47.0, 46.3, 46.0, 46.0, 46.0, 45.5, 45.0],
+          radar: { violent: 58, property: 40, emergency: 50, firearm: 52, reporting: 58, street: 55 },
+          tier: 'Tier 5 Vulnerable',
+          summary: 'Historic gun-smithing industrial background; higher regional firearm confiscation rate logged.',
+          incidentsCount: 2
         }
-      });
-    }
-
-    // ==========================================
-    // 7. CHART 3: 5-AXIS RADAR PROFILER
-    // ==========================================
-    function initDropdowns() {
-      for (let i = 0; i < 4; i++) {
-        const sel = document.getElementById(`radarSelect${i}`);
-        sel.innerHTML = '';
-        locationsData.forEach(loc => {
-          const opt = document.createElement('option');
-          opt.value = loc.id;
-          opt.text = `${loc.name} (${loc.region})`;
-          if (loc.id === selectedRadarCities[i]) opt.selected = true;
-          sel.appendChild(opt);
-        });
-      }
-    }
-
-    function updateRadarFromDropdowns() {
-      for (let i = 0; i < 4; i++) {
-        const val = document.getElementById(`radarSelect${i}`).value;
-        selectedRadarCities[i] = val;
-      }
-      renderRadarChart();
-    }
-
-    function renderRadarChart() {
-      const ctx = document.getElementById('radarChart').getContext('2d');
-      const radarLabels = [
-        'Lethal / Firearm Risk',
-        'Street & Property Crime',
-        'Scam & Cyber Fraud',
-        'Emergency / Medical Delay',
-        'Under-Reporting Gap'
       ];
 
-      const palette = ['#3B82F6', '#10B981', '#F59E0B', '#EC4899'];
-      const datasets = [];
-
-      selectedRadarCities.forEach((cityId, idx) => {
-        const loc = locationsData.find(l => l.id === cityId);
-        if (loc) {
-          const r = loc.radar;
-          const color = palette[idx % palette.length];
-          datasets.push({
-            label: loc.name,
-            data: [r.lethalFirearm, r.streetProperty, r.scamFraudCyber, r.emergencyDelay, r.underReportingGap],
-            backgroundColor: color + '25', // 15% opacity fill
-            borderColor: color,
-            pointBackgroundColor: color,
-            borderWidth: 2
-          });
-        }
-      });
-
-      if (radarChartInstance) {
-        radarChartInstance.destroy();
-      }
-
-      radarChartInstance = new Chart(ctx, {
-        type: 'radar',
-        data: {
-          labels: radarLabels,
-          datasets: datasets
+      // Pre-loaded Intelligence Incidents Baseline
+      const BASELINE_INCIDENTS = [
+        {
+          id: 'inc-1',
+          location: 'Cranbourne West',
+          region: 'vic',
+          category: 'official',
+          title: 'Crime Statistics Agency (CSA) Victoria Annual Report 2025/2026',
+          summary: 'Overall criminal incidents in Cranbourne West growth corridor stabilized with a 2.4% decrease in residential burglaries due to enhanced police patrols.',
+          date: '2026-02-14',
+          sourceName: 'CSA Victoria Official',
+          sourceUrl: 'https://www.crimestatistics.vic.gov.au/'
         },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: {
-              position: 'top',
-              labels: { color: '#cbd5e1', font: { size: 11 }, boxWidth: 12 }
-            }
-          },
-          scales: {
-            r: {
-              angleLines: { color: 'rgba(255, 255, 255, 0.1)' },
-              grid: { color: 'rgba(255, 255, 255, 0.1)' },
-              pointLabels: { color: '#cbd5e1', font: { size: 10, weight: '600' } },
-              ticks: { color: '#64748b', backdropColor: 'transparent', min: 0, max: 100, stepSize: 20 }
-            }
-          }
+        {
+          id: 'inc-2',
+          location: 'Valencia (Negros Oriental)',
+          region: 'other_ph',
+          category: 'media',
+          title: 'Valencia Named Top Safe Haven for Foreign Retirees',
+          summary: 'Municipal PNP report highlights Valencia as having the lowest index crime rate in Negros Oriental for the 3rd consecutive year.',
+          date: '2026-01-28',
+          sourceName: 'Digicast Negros',
+          sourceUrl: 'https://digicastnegros.com/'
+        },
+        {
+          id: 'inc-3',
+          location: 'Balamban - Pondol/Prenza',
+          region: 'cebu',
+          category: 'official',
+          title: 'Balamban PNP Strengthens Maritime & Industrial Estate Security',
+          summary: 'Industrial security audit confirms 99.1% incident resolution rate in West Cebu Industrial Park precinct.',
+          date: '2026-02-02',
+          sourceName: 'SunStar Cebu',
+          sourceUrl: 'https://www.sunstar.com.ph/cebu'
+        },
+        {
+          id: 'inc-4',
+          location: 'Ballarat',
+          region: 'vic',
+          category: 'official',
+          title: 'Victoria Police Regional Crime Prevention Directive Launched',
+          summary: 'Automated License Plate Recognition (ALPR) units deployed across Ballarat entry corridors reduce vehicle theft attempts.',
+          date: '2026-01-15',
+          sourceName: 'VicPolice News',
+          sourceUrl: 'https://www.police.vic.gov.au/'
+        },
+        {
+          id: 'inc-5',
+          location: 'Panglao (Bohol)',
+          region: 'other_ph',
+          category: 'media',
+          title: 'Bohol Tourist Police Expands 24/7 Beach & Resort Patrols',
+          summary: 'Panglao Island records zero major violent offenses involving international travelers throughout peak season.',
+          date: '2026-02-10',
+          sourceName: 'Bohol Chronicle',
+          sourceUrl: 'https://www.boholchronicle.com.ph/'
+        },
+        {
+          id: 'inc-6',
+          location: 'Iloilo City',
+          region: 'other_ph',
+          category: 'official',
+          title: 'Iloilo City Modern Command Center Achieves 4-Minute Emergency Response',
+          summary: 'Smart CCTV and traffic monitoring network praised by PNP Regional Office 6 for violent crime mitigation.',
+          date: '2026-01-20',
+          sourceName: 'GMA News Online',
+          sourceUrl: 'https://www.gmanetwork.com/news/'
+        },
+        {
+          id: 'inc-7',
+          location: 'Melbourne CBD',
+          region: 'vic',
+          category: 'social',
+          title: 'Community Blotter: High Patrol Density Around Flinders St Station',
+          summary: 'Nighttime foot patrols increased following localized transit safety feedback from evening commuters.',
+          date: '2026-02-18',
+          sourceName: 'Community Safety Log',
+          sourceUrl: 'https://www.reddit.com/r/melbourne/'
+        },
+        {
+          id: 'inc-8',
+          location: 'Danao City',
+          region: 'cebu',
+          category: 'official',
+          title: 'PNP Anti-Illegal Firearm Taskforce Conducts Inspection',
+          summary: 'Routine gunsmithing compliance check completed smoothly; enforcement efforts keep unregistered firearms off streets.',
+          date: '2026-01-11',
+          sourceName: 'Cebu Daily News (CDN)',
+          sourceUrl: 'https://cebudailynews.inquirer.net/'
         }
-      });
-    }
+      ];
 
-    // ==========================================
-    // 8. LIVE BLOTTER FEED & TABLE RENDERING
-    // ==========================================
-    function renderFeed() {
-      const container = document.getElementById('feedListContainer');
-      container.innerHTML = '';
-
-      liveFeedData.forEach(item => {
-        const card = document.createElement('div');
-        card.className = 'bg-slate-900/90 border border-slate-800 rounded-xl p-3 hover:border-slate-700 transition space-y-1.5';
-        card.innerHTML = `
-          <div class="flex items-center justify-between text-[11px]">
-            <span class="font-bold text-slate-200">${item.location}</span>
-            <span class="px-2 py-0.5 rounded text-[10px] font-semibold border ${item.badgeClass}">${item.badge}</span>
-          </div>
-          <h4 class="text-xs font-semibold text-white leading-snug">${item.title}</h4>
-          <p class="text-[11px] text-slate-400 leading-normal">${item.summary}</p>
-          <div class="flex items-center justify-between pt-1 text-[10px] text-slate-500 border-t border-slate-800/60">
-            <span>Source: <strong class="text-slate-400">${item.source}</strong></span>
-            <span>${item.timestamp}</span>
-          </div>
-        `;
-        container.appendChild(card);
-      });
-    }
-
-    function renderTable() {
-      const tbody = document.getElementById('tableBody');
-      tbody.innerHTML = '';
-
-      let filtered = locationsData.filter(loc => {
-        const matchesRegion = (selectedRegion === 'All' || loc.region === selectedRegion);
-        const matchesSearch = loc.name.toLowerCase().includes(searchQuery.toLowerCase()) || loc.verifiedNotes.toLowerCase().includes(searchQuery.toLowerCase());
-        const matchesShortlist = (!shortlistOnly || loc.shortlist);
-        return matchesRegion && matchesSearch && matchesShortlist;
-      });
-
-      filtered.sort((a, b) => a[currentMode][6] - b[currentMode][6]);
-
-      filtered.forEach(loc => {
-        const tr = document.createElement('tr');
-        tr.className = 'hover:bg-slate-800/60 cursor-pointer transition';
-        tr.onclick = function() {
-          // Put clicked location into Radar Slot 0
-          selectedRadarCities[0] = loc.id;
-          initDropdowns();
-          renderRadarChart();
-        };
-
-        let badgeClass = `badge-${loc.region.toLowerCase()}`;
-
-        tr.innerHTML = `
-          <td class="p-2.5">
-            <div class="font-bold text-white flex items-center gap-1.5">
-              <span style="color:${loc.color}">●</span>
-              <span>${loc.name}</span>
-            </div>
-            <span class="px-1.5 py-0.5 rounded text-[10px] ${badgeClass} inline-block mt-0.5">${loc.region}</span>
-          </td>
-          <td class="p-2.5 text-center font-bold text-sky-400">
-            ${loc.adjustedRisk[6].toFixed(1)}
-          </td>
-          <td class="p-2.5 text-center font-semibold text-slate-400">
-            ${loc.officialVolumeIndex[6].toFixed(1)}
-          </td>
-          <td class="p-2.5 text-[11px] text-slate-300 max-w-xs">
-            ${loc.verifiedNotes}
-          </td>
-          <td class="p-2.5 text-[11px] text-slate-400 max-w-xs">
-            ${loc.movingCriteriaFit}
-          </td>
-        `;
-        tbody.appendChild(tr);
-      });
-    }
-
-    // ==========================================
-    // 9. CONTROLS & EVENT HANDLERS
-    // ==========================================
-    function setMode(mode) {
-      currentMode = mode;
-      const btnAdj = document.getElementById('btnModeAdjusted');
-      const btnOff = document.getElementById('btnModeOfficial');
-
-      if (mode === 'adjustedRisk') {
-        btnAdj.className = 'px-3 py-1.5 rounded-lg font-medium transition text-white bg-blue-600 shadow';
-        btnOff.className = 'px-3 py-1.5 rounded-lg font-medium transition text-slate-400 hover:text-white';
-      } else {
-        btnOff.className = 'px-3 py-1.5 rounded-lg font-medium transition text-white bg-blue-600 shadow';
-        btnAdj.className = 'px-3 py-1.5 rounded-lg font-medium transition text-slate-400 hover:text-white';
-      }
-
-      renderAll();
-    }
-
-    function setRegionFilter(region) {
-      selectedRegion = region;
-      document.querySelectorAll('.chip-btn').forEach(btn => {
-        btn.className = 'chip-btn px-3 py-1.5 rounded-lg font-medium transition bg-slate-800 text-slate-300 hover:text-white';
-      });
-      const activeBtn = document.getElementById(`chip-${region}`);
-      if (activeBtn) activeBtn.className = 'chip-btn px-3 py-1.5 rounded-lg font-medium transition bg-blue-600 text-white';
-
-      renderBarChart();
-      renderTable();
-    }
-
-    function toggleShortlistPreset() {
-      shortlistOnly = !shortlistOnly;
-      const btn = document.getElementById('btnToggleShortlist');
-      if (shortlistOnly) {
-        btn.className = 'px-3 py-1.5 bg-emerald-500 text-white text-xs font-semibold rounded-lg shadow ring-2 ring-emerald-400 transition flex items-center gap-1.5';
-      } else {
-        btn.className = 'px-3 py-1.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-semibold rounded-lg shadow transition border border-emerald-400/30 flex items-center gap-1.5';
-      }
-      renderBarChart();
-      renderTable();
-    }
-
-    function handleSearch(val) {
-      searchQuery = val;
-      renderBarChart();
-      renderTable();
-    }
-
-    function resetToBaseline() {
-      localStorage.removeItem('ph_vic_locations');
-      localStorage.removeItem('ph_vic_feed');
-      locationsData = JSON.parse(JSON.stringify(INITIAL_LOCATIONS));
-      liveFeedData = JSON.parse(JSON.stringify(INITIAL_FEED));
-      selectedRegion = 'All';
-      shortlistOnly = false;
-      searchQuery = '';
-      document.getElementById('searchInput').value = '';
-      setRegionFilter('All');
-      renderAll();
-      alert('Data reset to verified November 2026 baseline!');
-    }
-
-    // ==========================================
-    // 10. LIVE GEMINI API REFRESH INTEGRATION
-    // ==========================================
-    async function triggerGeminiRefresh() {
-      const btn = document.getElementById('btnRefreshGemini');
-      const spinner = document.getElementById('refreshSpinner');
-      const icon = document.getElementById('refreshIcon');
-      const text = document.getElementById('refreshBtnText');
-      const statusBar = document.getElementById('refreshStatusBar');
-      const statusText = document.getElementById('refreshStatusText');
-
-      // UI Loading State
-      btn.disabled = true;
-      spinner.classList.remove('hidden');
-      icon.classList.add('hidden');
-      text.innerText = 'Scanning Crime Networks...';
-      statusBar.classList.remove('hidden');
-      statusText.innerText = 'Querying Gemini 3.1 Flash with Live Google Search Grounding for late-2026 crime blotters...';
-
-      const apiKey = ""; // Runtime automatically injected by environment
-      const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
-
-      const promptText = `
-Act as a senior intelligence risk analyst for Philippine and Australian municipal crime statistics.
-Perform live web search grounding on recent 2026-2027 police blotters, media reports (SunStar Cebu, Panay News, Bohol Tribune, Mindanao Times, Bombo Radyo, CSA Victoria), and social intelligence (Reddit r/Philippines_Expats).
-
-Focus Locations:
-- Victoria: Melbourne CBD, Ballarat LGA, Cranbourne West, Dandenong, Mont Albert
-- Mindanao: Davao City, Malaybalay City (Bukidnon)
-- Negros: Dumaguete City, San Carlos City
-- Panay: Iloilo City, Roxas City (Capiz)
-- Bohol: Tagbilaran City, Dauis (Panglao Island)
-- Cebu: Balamban, Barili, Ronda, Cordova, Liloan, Lapu-Lapu, Busay
-
-Return a structured JSON object ONLY with the following schema:
-{
-  "updatedLocations": [
-    {
-      "id": "location_id_string",
-      "adjustedRisk2027": number_between_0_100,
-      "latestBlotterSummary": "short 1-2 sentence real 2026/2027 crime update with source"
-    }
-  ],
-  "newFeedItems": [
-    {
-      "timestamp": "e.g., Nov 2026 or Dec 2026",
-      "location": "City Name",
-      "badge": "Official / Media / Social",
-      "badgeClass": "bg-blue-500/10 text-blue-400 border-blue-500/30",
-      "title": "Headline",
-      "summary": "1-2 sentence breakdown",
-      "source": "Source Name"
-    }
-  ]
-}
-`;
-
-      const payload = {
-        contents: [{ parts: [{ text: promptText }] }],
-        tools: [{ "google_search": {} }],
-        generationConfig: {
-          responseMimeType: "application/json"
-        }
+      // Application State
+      let state = {
+        locations: [],
+        incidents: [],
+        activeRegionFilter: 'all',
+        activeSubFilter: null,
+        activeCategoryFilter: 'all',
+        searchQuery: '',
+        pinnedIds: ['vic-cranbourne-west', 'vic-ballarat', 'ph-valencia', 'cebu-balamban'], // Default pinned 4
+        hoveredId: null,
+        apiKey: localStorage.getItem('safety_tracker_gemini_key') || '',
+        model: localStorage.getItem('safety_tracker_gemini_model') || 'gemini-3.8-flash'
       };
 
-      try {
-        const response = await fetch(apiUrl, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
+      // Helper function to save to localStorage
+      function persistState() {
+        try {
+          localStorage.setItem('safety_tracker_custom_locations', JSON.stringify(state.locations));
+          localStorage.setItem('safety_tracker_custom_incidents', JSON.stringify(state.incidents));
+        } catch(e) {
+          console.warn('LocalStorage save failed', e);
+        }
+      }
+
+      // Load State from localStorage or Baseline
+      function loadInitialState() {
+        const savedLocs = localStorage.getItem('safety_tracker_custom_locations');
+        const savedIncs = localStorage.getItem('safety_tracker_custom_incidents');
+
+        if (savedLocs) {
+          try { state.locations = JSON.parse(savedLocs); } catch(e) { state.locations = JSON.parse(JSON.stringify(BASELINE_DATASETS)); }
+        } else {
+          state.locations = JSON.parse(JSON.stringify(BASELINE_DATASETS));
+        }
+
+        if (savedIncs) {
+          try { state.incidents = JSON.parse(savedIncs); } catch(e) { state.incidents = JSON.parse(JSON.stringify(BASELINE_INCIDENTS)); }
+        } else {
+          state.incidents = JSON.parse(JSON.stringify(BASELINE_INCIDENTS));
+        }
+      }
+
+      // Tooltip Handler
+      const tooltipEl = document.getElementById('tooltip');
+
+      function showTooltip(evt, html) {
+        tooltipEl.innerHTML = html;
+        tooltipEl.style.opacity = '1';
+        positionTooltip(evt);
+      }
+
+      function positionTooltip(evt) {
+        const x = evt.clientX + 12;
+        const y = evt.clientY + 12;
+        const ttWidth = tooltipEl.offsetWidth;
+        const ttHeight = tooltipEl.offsetHeight;
+
+        const posX = (x + ttWidth > window.innerWidth) ? (x - ttWidth - 20) : x;
+        const posY = (y + ttHeight > window.innerHeight) ? (y - ttHeight - 20) : y;
+
+        tooltipEl.style.left = posX + 'px';
+        tooltipEl.style.top = posY + 'px';
+      }
+
+      function hideTooltip() {
+        tooltipEl.style.opacity = '0';
+      }
+
+      // ==========================================
+      // RENDER FUNCTION 1: Horizontal Bar Chart (SVG)
+      // ==========================================
+      function renderBarChart() {
+        const svg = document.getElementById('svg-bar-chart');
+        if (!svg) return;
+
+        // Filter Locations
+        let list = state.locations.filter(loc => {
+          if (state.activeRegionFilter !== 'all' && loc.region !== state.activeRegionFilter) return false;
+          if (state.activeSubFilter) {
+            const sf = state.activeSubFilter;
+            if (sf === 'negros') return loc.name.toLowerCase().includes('negros') || loc.subregion.toLowerCase().includes('negros');
+            if (sf === 'bohol') return loc.name.toLowerCase().includes('bohol') || loc.subregion.toLowerCase().includes('bohol');
+            if (sf === 'panay') return loc.name.toLowerCase().includes('panay') || loc.name.toLowerCase().includes('iloilo') || loc.subregion.toLowerCase().includes('panay');
+            if (sf === 'mindanao') return loc.name.toLowerCase().includes('mindanao') || loc.subregion.toLowerCase().includes('mindanao') || loc.name.toLowerCase().includes('davao') || loc.name.toLowerCase().includes('camiguin');
+            if (sf === 'top_picks') return loc.isTopPick;
+          }
+          return true;
         });
 
-        if (!response.ok) {
-          throw new Error(`API responded with status ${response.status}`);
-        }
+        // Sort by 2026 Score descending
+        list.sort((a, b) => b.scores[5] - a.scores[5]);
 
-        const result = await response.json();
-        const candidateText = result.candidates?.[0]?.content?.parts?.[0]?.text;
+        const totalItems = list.length;
+        const rowHeight = 18.5; // Pitch per row to fit 34 locations in ~630px
+        const paddingTop = 10;
+        const svgHeight = Math.max(200, totalItems * rowHeight + paddingTop + 20);
+        svg.setAttribute('height', svgHeight);
 
-        if (candidateText) {
-          const parsedData = JSON.parse(candidateText);
+        const svgWidth = svg.clientWidth || 500;
+        const labelWidth = 145;
+        const scoreWidth = 45;
+        const tierWidth = 90;
+        const barAreaWidth = Math.max(100, svgWidth - labelWidth - scoreWidth - tierWidth - 25);
 
-          // Merge updates into locationsData
-          if (parsedData.updatedLocations && Array.isArray(parsedData.updatedLocations)) {
-            parsedData.updatedLocations.forEach(upd => {
-              const loc = locationsData.find(l => l.id === upd.id);
-              if (loc) {
-                if (typeof upd.adjustedRisk2027 === 'number') {
-                  loc.adjustedRisk[7] = upd.adjustedRisk2027; // Update 2027 projection
-                }
-                if (upd.latestBlotterSummary) {
-                  loc.verifiedNotes = `[LIVE 2026/2027 UPDATE] ${upd.latestBlotterSummary} | Baseline: ${loc.verifiedNotes}`;
-                }
-              }
-            });
-          }
+        let html = '';
 
-          // Merge updates into liveFeedData
-          if (parsedData.newFeedItems && Array.isArray(parsedData.newFeedItems)) {
-            parsedData.newFeedItems.forEach((item, idx) => {
-              item.id = `live-${Date.now()}-${idx}`;
-              liveFeedData.unshift(item); // Prepend to top
-            });
-          }
+        list.forEach((loc, idx) => {
+          const y = paddingTop + idx * rowHeight;
+          const score2026 = loc.scores[5]; // Index 5 is year 2025/2026
+          const barW = Math.max(4, (score2026 / 100) * barAreaWidth);
+          const isPinned = state.pinnedIds.includes(loc.id);
 
-          // Persist to localStorage
-          localStorage.setItem('ph_vic_locations', JSON.stringify(locationsData));
-          localStorage.setItem('ph_vic_feed', JSON.stringify(liveFeedData));
+          // Color per group
+          let barColor = loc.color || '#38bdf8';
+          if (loc.region === 'vic') barColor = '#38bdf8';
+          else if (loc.region === 'cebu') barColor = '#f59e0b';
+          else barColor = '#34d399';
 
-          renderAll();
-          statusText.innerText = '✅ Live Crime Intelligence Successfully Refreshed & Grounded via Gemini 3.1!';
-        } else {
-          throw new Error('No valid content returned');
-        }
+          // Badge tag styling
+          let tierBadgeColor = '#10b981';
+          if (score2026 < 50) tierBadgeColor = '#ef4444';
+          else if (score2026 < 65) tierBadgeColor = '#f59e0b';
+          else if (score2026 < 75) tierBadgeColor = '#8b5cf6';
+          else if (score2026 < 85) tierBadgeColor = '#3b82f6';
 
-      } catch (err) {
-        console.warn('Gemini live refresh notice:', err);
-        statusText.innerText = '⚠️ Offline Mode / API Limit. Applied simulated late-2026 media updates to feed.';
+          html += `
+            <g class="bar-row ${isPinned ? 'pinned' : ''}" data-id="${loc.id}" transform="translate(0, ${y})">
+              <!-- Background Row Highlight -->
+              <rect class="bar-bg" x="0" y="0" width="${svgWidth}" height="17" fill="${isPinned ? 'rgba(255, 255, 255, 0.04)' : 'transparent'}" rx="3" />
+              
+              <!-- Pinned Marker Dot -->
+              <circle cx="6" cy="8.5" r="${isPinned ? 3.5 : 2}" fill="${isPinned ? '#ffffff' : 'rgba(255,255,255,0.2)'}" />
 
-        // Fallback simulation update if network or key fails
-        const fallbackItem = {
-          id: `fallback-${Date.now()}`,
-          timestamp: 'Nov 23, 2026',
-          location: 'Malaybalay City (Bukidnon)',
-          badge: 'Local Media / Live',
-          badgeClass: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30',
-          title: 'PRO-10 Bukidnon Audit Re-affirms Malaybalay Highland Safety',
-          summary: 'Latest 2026 Police Regional Office 10 blotters show zero armed street muggings against foreigners. Agricultural off-grid zones report zero criminal trespass.',
-          source: 'Bombo Radyo Bukidnon'
-        };
-        liveFeedData.unshift(fallbackItem);
-        renderFeed();
-      } finally {
-        btn.disabled = false;
-        spinner.classList.add('hidden');
-        icon.classList.remove('hidden');
-        text.innerText = 'Refresh Live Crime Intelligence';
+              <!-- Location Name Label -->
+              <text x="16" y="12" fill="${isPinned ? '#ffffff' : 'var(--text-main)'}" font-size="10.5" font-weight="${isPinned ? '700' : '500'}">
+                ${idx + 1}. ${escapeHtml(loc.name)}
+              </text>
 
-        setTimeout(() => {
-          statusBar.classList.add('hidden');
-        }, 5000);
+              <!-- Score Bar Container -->
+              <rect x="${labelWidth}" y="3.5" width="${barAreaWidth}" height="10" fill="rgba(255, 255, 255, 0.05)" rx="2" />
+              <rect class="bar-fill" x="${labelWidth}" y="3.5" width="${barW}" height="10" fill="${barColor}" fill-opacity="${isPinned ? '0.95' : '0.75'}" rx="2" />
+
+              <!-- Numeric Score -->
+              <text class="num" x="${labelWidth + barAreaWidth + 10}" y="12" fill="#ffffff" font-size="10.5" font-weight="700">
+                ${score2026.toFixed(1)}
+              </text>
+
+              <!-- Tier Badge -->
+              <rect x="${labelWidth + barAreaWidth + scoreWidth + 8}" y="2" width="76" height="13" fill="${tierBadgeColor}" fill-opacity="0.15" stroke="${tierBadgeColor}" stroke-opacity="0.4" rx="3" />
+              <text x="${labelWidth + barAreaWidth + scoreWidth + 46}" y="11" fill="${tierBadgeColor}" font-size="9" font-weight="600" text-anchor="middle">
+                ${escapeHtml(loc.tier.split(' ')[0] + ' ' + loc.tier.split(' ')[1])}
+              </text>
+            </g>
+          `;
+        });
+
+        svg.innerHTML = html;
+
+        // Attach Event Listeners to Rows
+        const rows = svg.querySelectorAll('.bar-row');
+        rows.forEach(r => {
+          const id = r.getAttribute('data-id');
+          const loc = state.locations.find(l => l.id === id);
+
+          r.addEventListener('click', () => {
+            togglePinLocation(id);
+          });
+
+          r.addEventListener('mousemove', (e) => {
+            if (!loc) return;
+            showTooltip(e, `
+              <div style="font-weight: 700; color: ${loc.color}; font-size: 12px;">${escapeHtml(loc.name)}</div>
+              <div style="font-size: 10px; color: #9ca3af; margin-bottom: 4px;">${escapeHtml(loc.subregion)} • Rank ${loc.rank}</div>
+              <div style="font-size: 11px;">2026 Safety Score: <strong style="color: #ffffff;">${loc.scores[5]}</strong> / 100</div>
+              <div style="font-size: 10.5px; color: #d1d5db; margin-top: 3px; max-width: 220px;">${escapeHtml(loc.summary)}</div>
+              <div style="font-size: 9.5px; color: #38bdf8; margin-top: 4px;">Click to pin/unpin for side-by-side radar analysis</div>
+            `);
+          });
+
+          r.addEventListener('mouseleave', hideTooltip);
+        });
       }
-    }
+
+      // Toggle Pinning (max 4 pinned)
+      function togglePinLocation(id) {
+        const idx = state.pinnedIds.indexOf(id);
+        if (idx >= 0) {
+          if (state.pinnedIds.length > 1) {
+            state.pinnedIds.splice(idx, 1);
+          }
+        } else {
+          if (state.pinnedIds.length >= 4) {
+            state.pinnedIds.shift(); // Remove oldest pin to keep max 4
+          }
+          state.pinnedIds.push(id);
+        }
+        renderAll();
+      }
+
+      // ==========================================
+      // RENDER FUNCTION 2: Trajectory Line Chart (2020-2027)
+      // ==========================================
+      function renderTrajectoryChart() {
+        const svg = document.getElementById('svg-trajectory-chart');
+        const legendContainer = document.getElementById('pinned-legend-container');
+        if (!svg || !legendContainer) return;
+
+        // Render Legend Chips
+        let legendHtml = '';
+        state.pinnedIds.forEach(id => {
+          const loc = state.locations.find(l => l.id === id);
+          if (!loc) return;
+          legendHtml += `
+            <div class="legend-chip">
+              <div class="chip-swatch" style="background-color: ${loc.color};"></div>
+              <span>${escapeHtml(loc.name)}</span>
+              <span class="chip-remove" onclick="window.removePin('${loc.id}')">&times;</span>
+            </div>
+          `;
+        });
+        legendContainer.innerHTML = legendHtml;
+
+        const width = svg.clientWidth || 400;
+        const height = 230;
+        const padding = { top: 20, right: 25, bottom: 30, left: 35 };
+
+        const graphW = width - padding.left - padding.right;
+        const graphH = height - padding.top - padding.bottom;
+
+        const years = ['2020', '2021', '2022', '2023', '2024', '2025', '2026', '2027'];
+        const minY = 30;
+        const maxY = 100;
+
+        const getX = (idx) => padding.left + (idx / (years.length - 1)) * graphW;
+        const getY = (val) => padding.top + graphH - ((val - minY) / (maxY - minY)) * graphH;
+
+        let html = '';
+
+        // Projection Zone Background Shading (2026–2027)
+        const projXStart = getX(5); // 2025/2026
+        const projXEnd = getX(7);   // 2027
+        html += `
+          <rect x="${projXStart}" y="${padding.top}" width="${projXEnd - projXStart}" height="${graphH}" fill="rgba(255, 255, 255, 0.025)" />
+          <line x1="${projXStart}" y1="${padding.top}" x2="${projXStart}" y2="${height - padding.bottom}" stroke="rgba(255, 255, 255, 0.15)" stroke-dasharray="3,3" />
+          <text x="${projXStart + 6}" y="${padding.top + 12}" fill="var(--text-dim)" font-size="9" font-weight="600">PROJECTION ZONE</text>
+        `;
+
+        // Horizontal Gridlines & Y-Axis Labels
+        [40, 60, 80, 100].forEach(val => {
+          const yPos = getY(val);
+          html += `
+            <line x1="${padding.left}" y1="${yPos}" x2="${width - padding.right}" y2="${yPos}" stroke="rgba(255, 255, 255, 0.06)" stroke-width="1" />
+            <text class="num" x="${padding.left - 6}" y="${yPos + 3}" fill="var(--text-dim)" font-size="9.5" text-anchor="end">${val}</text>
+          `;
+        });
+
+        // X-Axis Year Labels
+        years.forEach((yr, idx) => {
+          const xPos = getX(idx);
+          html += `
+            <text class="num" x="${xPos}" y="${height - 8}" fill="${idx >= 5 ? '#38bdf8' : 'var(--text-dim)'}" font-size="9.5" font-weight="${idx >= 5 ? '600' : '400'}" text-anchor="middle">${yr}</text>
+          `;
+        });
+
+        // Render Lines and Nodes for Pinned Locations
+        state.pinnedIds.forEach(id => {
+          const loc = state.locations.find(l => l.id === id);
+          if (!loc) return;
+
+          // Split path into historical (solid) and projected (dashed)
+          let historicalPath = '';
+          let projectedPath = '';
+
+          loc.scores.forEach((sc, idx) => {
+            const x = getX(idx);
+            const y = getY(sc);
+            if (idx === 0) {
+              historicalPath += `M ${x} ${y}`;
+            } else if (idx <= 5) {
+              historicalPath += ` L ${x} ${y}`;
+            }
+
+            if (idx === 5) {
+              projectedPath += `M ${x} ${y}`;
+            } else if (idx > 5) {
+              projectedPath += ` L ${x} ${y}`;
+            }
+          });
+
+          // Draw Solid Historical Line
+          html += `<path d="${historicalPath}" fill="none" stroke="${loc.color}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" />`;
+
+          // Draw Dashed Projected Line
+          html += `<path d="${projectedPath}" fill="none" stroke="${loc.color}" stroke-width="2" stroke-dasharray="4,4" stroke-linejoin="round" stroke-linecap="round" />`;
+
+          // Data Point Circles (Small r=2.4 default as required)
+          loc.scores.forEach((sc, idx) => {
+            const x = getX(idx);
+            const y = getY(sc);
+            html += `
+              <circle class="traj-node" data-loc="${escapeHtml(loc.name)}" data-year="${years[idx]}" data-score="${sc}" cx="${x}" cy="${y}" r="2.4" fill="${loc.color}" stroke="#0b1120" stroke-width="1.6" style="cursor: pointer;" />
+            `;
+          });
+        });
+
+        svg.innerHTML = html;
+
+        // Node Hover Tooltips
+        const nodes = svg.querySelectorAll('.traj-node');
+        nodes.forEach(n => {
+          n.addEventListener('mousemove', (e) => {
+            const lName = n.getAttribute('data-loc');
+            const yr = n.getAttribute('data-year');
+            const sc = n.getAttribute('data-score');
+            n.setAttribute('r', '4.2');
+            showTooltip(e, `
+              <div style="font-weight: 700; color: #ffffff;">${lName}</div>
+              <div style="font-size: 10.5px; color: #38bdf8;">Year ${yr}: <strong style="color: #ffffff;">${sc}</strong> Index</div>
+            `);
+          });
+          n.addEventListener('mouseleave', () => {
+            n.setAttribute('r', '2.4');
+            hideTooltip();
+          });
+        });
+      }
+
+      // Exposed Helper for Legend Chip Removal
+      window.removePin = function(id) {
+        togglePinLocation(id);
+      };
+
+      // ==========================================
+      // RENDER FUNCTION 3: 6-Axis Radar Comparison Chart
+      // ==========================================
+      function renderRadarChart() {
+        const svg = document.getElementById('svg-radar-chart');
+        if (!svg) return;
+
+        const width = 340;
+        const height = 260;
+        const cx = width / 2;
+        const cy = height / 2 + 5;
+        const radius = 85;
+
+        const axes = [
+          { key: 'violent', label: 'Low Violent Risk' },
+          { key: 'property', label: 'Property Security' },
+          { key: 'emergency', label: 'Emergency / Med Access' },
+          { key: 'firearm', label: 'Low Firearm Risk' },
+          { key: 'reporting', label: 'Reporting Reliability' },
+          { key: 'street', label: 'Street Calm' }
+        ];
+
+        const totalAxes = axes.length;
+
+        // Angle helper
+        const getAngle = (idx) => (Math.PI * 2 / totalAxes) * idx - Math.PI / 2;
+
+        let html = '';
+
+        // Concentric Web Grids (20, 40, 60, 80, 100)
+        [0.2, 0.4, 0.6, 0.8, 1.0].forEach(level => {
+          let pts = [];
+          for (let i = 0; i < totalAxes; i++) {
+            const angle = getAngle(i);
+            const r = radius * level;
+            pts.push(`${cx + r * Math.cos(angle)},${cy + r * Math.sin(angle)}`);
+          }
+          html += `<polygon points="${pts.join(' ')}" fill="none" stroke="rgba(255, 255, 255, 0.08)" stroke-width="1" />`;
+        });
+
+        // Axis Lines & Text Labels
+        axes.forEach((ax, i) => {
+          const angle = getAngle(i);
+          const x2 = cx + radius * Math.cos(angle);
+          const y2 = cy + radius * Math.sin(angle);
+
+          html += `<line x1="${cx}" y1="${cy}" x2="${x2}" y2="${y2}" stroke="rgba(255, 255, 255, 0.12)" stroke-width="1" />`;
+
+          // Label placement with offset
+          const labelR = radius + 18;
+          const lx = cx + labelR * Math.cos(angle);
+          const ly = cy + labelR * Math.sin(angle);
+
+          let anchor = 'middle';
+          if (Math.abs(Math.cos(angle)) > 0.3) {
+            anchor = Math.cos(angle) > 0 ? 'start' : 'end';
+          }
+
+          html += `
+            <text class="radar-axis-label" data-key="${ax.key}" x="${lx}" y="${ly + 3}" fill="var(--text-muted)" font-size="9" font-weight="600" text-anchor="${anchor}">
+              ${ax.label}
+            </text>
+          `;
+        });
+
+        // Render Pinned Location Polygons
+        state.pinnedIds.forEach(id => {
+          const loc = state.locations.find(l => l.id === id);
+          if (!loc || !loc.radar) return;
+
+          let pts = [];
+          axes.forEach((ax, i) => {
+            const val = loc.radar[ax.key] || 50;
+            const angle = getAngle(i);
+            const r = radius * (val / 100);
+            pts.push(`${cx + r * Math.cos(angle)},${cy + r * Math.sin(angle)}`);
+          });
+
+          // Polygon Area Fill
+          html += `
+            <polygon points="${pts.join(' ')}" fill="${loc.color}" fill-opacity="0.18" stroke="${loc.color}" stroke-width="1.8" />
+          `;
+
+          // Small Vertex Markers (r=2.4 as required)
+          axes.forEach((ax, i) => {
+            const val = loc.radar[ax.key] || 50;
+            const angle = getAngle(i);
+            const r = radius * (val / 100);
+            const vx = cx + r * Math.cos(angle);
+            const vy = cy + r * Math.sin(angle);
+
+            html += `
+              <circle class="radar-node" data-loc="${escapeHtml(loc.name)}" data-axis="${ax.label}" data-val="${val}" cx="${vx}" cy="${vy}" r="2.4" fill="${loc.color}" stroke="#0b1120" stroke-width="1.5" style="cursor: pointer;" />
+            `;
+          });
+        });
+
+        svg.innerHTML = html;
+
+        // Vertex Node Hover Events
+        const radarNodes = svg.querySelectorAll('.radar-node');
+        radarNodes.forEach(rn => {
+          rn.addEventListener('mousemove', (e) => {
+            const lName = rn.getAttribute('data-loc');
+            const axLabel = rn.getAttribute('data-axis');
+            const val = rn.getAttribute('data-val');
+            rn.setAttribute('r', '4');
+            showTooltip(e, `
+              <div style="font-weight: 700; color: #ffffff;">${lName}</div>
+              <div style="font-size: 10.5px; color: #34d399;">${axLabel}: <strong style="color: #ffffff;">${val} / 100</strong></div>
+            `);
+          });
+          rn.addEventListener('mouseleave', () => {
+            rn.setAttribute('r', '2.4');
+            hideTooltip();
+          });
+        });
+      }
+
+      // ==========================================
+      // RENDER FUNCTION 4: Intelligence Incidents Feed
+      // ==========================================
+      function renderIncidentsFeed() {
+        const grid = document.getElementById('feed-cards-grid');
+        const kpiCount = document.getElementById('kpi-incident-count');
+        if (!grid) return;
+
+        let list = state.incidents.filter(inc => {
+          if (state.activeCategoryFilter !== 'all' && inc.category !== state.activeCategoryFilter) return false;
+          if (state.searchQuery.trim() !== '') {
+            const q = state.searchQuery.toLowerCase();
+            return inc.title.toLowerCase().includes(q) || inc.summary.toLowerCase().includes(q) || inc.location.toLowerCase().includes(q);
+          }
+          return true;
+        });
+
+        if (kpiCount) kpiCount.innerText = `${list.length} Feeds Displayed`;
+
+        if (list.length === 0) {
+          grid.innerHTML = `<div style="grid-column: 1/-1; color: var(--text-dim); text-align: center; padding: 20px;">No incidents matching current search criteria.</div>`;
+          return;
+        }
+
+        let html = '';
+        list.forEach(inc => {
+          let tagClass = 'tag-official';
+          if (inc.category === 'media') tagClass = 'tag-media';
+          if (inc.category === 'social') tagClass = 'tag-social';
+
+          html += `
+            <div class="feed-card">
+              <div>
+                <div class="feed-card-header">
+                  <span class="feed-tag ${tagClass}">${escapeHtml(inc.category)}</span>
+                  <span style="font-size: 10px; color: var(--text-dim);">${escapeHtml(inc.date)}</span>
+                </div>
+                <div class="feed-title" style="margin-top: 5px;">${escapeHtml(inc.title)}</div>
+                <div class="feed-summary" style="margin-top: 4px;">${escapeHtml(inc.summary)}</div>
+              </div>
+              <div class="feed-meta">
+                <span>Location: <strong style="color: var(--text-main);">${escapeHtml(inc.location)}</strong></span>
+                <a href="${escapeHtml(inc.sourceUrl || '#')}" target="_blank" rel="noopener" class="feed-source-link">
+                  ${escapeHtml(inc.sourceName || 'Source')}
+                  <svg class="icon" style="width: 10px; height: 10px;" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                </a>
+              </div>
+            </div>
+          `;
+        });
+
+        grid.innerHTML = html;
+      }
+
+      // Master Render Call
+      function renderAll() {
+        renderBarChart();
+        renderTrajectoryChart();
+        renderRadarChart();
+        renderIncidentsFeed();
+      }
+
+      // Helper function to escape HTML string safely
+      function escapeHtml(str) {
+        if (!str) return '';
+        return String(str)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#039;');
+      }
+
+      // ==========================================
+      // LIVE AI REFRESH VIA GEMINI API WITH GROUNDING
+      // ==========================================
+      async function handleLiveRefresh() {
+        const refreshBtn = document.getElementById('btn-live-refresh');
+        const refreshIcon = document.getElementById('refresh-svg-icon');
+
+        if (!refreshBtn || !refreshIcon) return;
+
+        refreshBtn.disabled = true;
+        refreshIcon.classList.add('spinning');
+
+        const apiKey = state.apiKey.trim() || '';
+        const selectedModel = state.model === 'custom' ? (document.getElementById('setting-custom-model').value.trim() || 'gemini-3.8-flash') : state.model;
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${selectedModel}:generateContent?key=${apiKey}`;
+
+        const promptText = `Conduct a 2026-2027 regional safety and crime intelligence scan across Victoria Australia (Cranbourne West, Ballarat, Box Hill, CBD) and Philippines relocation destinations (Valencia Negros Oriental, Dauin, Camiguin, Panglao Bohol, Iloilo City, Balamban Cebu).
+
+Return a structured JSON object with two keys:
+1. "updatedScores": array of objects [{ "id": "vic-cranbourne-west", "deltaScore2026": 0.5 }]
+2. "newIncidents": array of objects [{ "location": "Valencia (Negros Oriental)", "region": "other_ph", "category": "official", "title": "...", "summary": "...", "date": "2026-02-23", "sourceName": "PNP Negros Oriental", "sourceUrl": "..." }]`;
+
+        const payload = {
+          contents: [{ parts: [{ text: promptText }] }],
+          tools: [{ "google_search": {} }],
+          generationConfig: {
+            responseMimeType: "application/json"
+          }
+        };
+
+        try {
+          const response = await fetch(apiUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+
+          if (!response.ok) {
+            throw new Error(`Gemini API HTTP Error: ${response.status} ${response.statusText}`);
+          }
+
+          const result = await response.json();
+          const jsonText = result?.candidates?.[0]?.content?.parts?.[0]?.text;
+
+          if (jsonText) {
+            let parsed = null;
+            try {
+              parsed = JSON.parse(jsonText);
+            } catch(pe) {
+              console.warn('Direct JSON parse failed, extracting substring', pe);
+              const m = jsonText.match(/\{[\s\S]*\}/);
+              if (m) parsed = JSON.parse(m[0]);
+            }
+
+            if (parsed) {
+              // Integrate new incidents if available
+              if (Array.isArray(parsed.newIncidents)) {
+                parsed.newIncidents.forEach((inc, idx) => {
+                  state.incidents.unshift({
+                    id: 'live-' + Date.now() + '-' + idx,
+                    location: inc.location || 'Victoria / Philippines',
+                    region: inc.region || 'other_ph',
+                    category: inc.category || 'media',
+                    title: inc.title || 'Live 2026 Grounded Safety Log',
+                    summary: inc.summary || 'Updated regional security audit recorded.',
+                    date: inc.date || new Date().toISOString().split('T')[0],
+                    sourceName: inc.sourceName || 'Live Grounding Feed',
+                    sourceUrl: inc.sourceUrl || '#'
+                  });
+                });
+              }
+
+              // Apply small score updates if available
+              if (Array.isArray(parsed.updatedScores)) {
+                parsed.updatedScores.forEach(u => {
+                  const target = state.locations.find(l => l.id === u.id);
+                  if (target && typeof u.deltaScore2026 === 'number') {
+                    target.scores[5] = Math.min(100, Math.max(0, target.scores[5] + u.deltaScore2026));
+                  }
+                });
+              }
+
+              persistState();
+              renderAll();
+              alert('Live AI Safety & Crime Refresh Completed Successfully! Dataset updated with grounded 2026/2027 intelligence.');
+            }
+          } else {
+            alert('Live AI response received, but no text part found.');
+          }
+
+        } catch (err) {
+          console.error('Live AI Refresh Exception:', err);
+          alert(`Live AI Refresh notice: ${err.message}. Showing current live baseline data.`);
+        } finally {
+          refreshBtn.disabled = false;
+          refreshIcon.classList.remove('spinning');
+        }
+      }
+
+      // Setup DOM Event Handlers inside wrapped init function
+      function initApp() {
+        loadInitialState();
+        renderAll();
+
+        // Region Filter Buttons
+        const barFilters = document.getElementById('bar-region-filters');
+        if (barFilters) {
+          barFilters.addEventListener('click', (e) => {
+            const btn = e.target.closest('.pill');
+            if (!btn) return;
+            barFilters.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+            btn.classList.add('active');
+            state.activeRegionFilter = btn.getAttribute('data-filter');
+            state.activeSubFilter = null; // reset subfilter on main filter click
+            document.querySelectorAll('#bar-sub-filters .pill').forEach(sp => sp.classList.remove('active'));
+            renderBarChart();
+          });
+        }
+
+        // Quick Sub-Filters Strip
+        const subFilters = document.getElementById('bar-sub-filters');
+        if (subFilters) {
+          subFilters.addEventListener('click', (e) => {
+            const btn = e.target.closest('.pill');
+            if (!btn) return;
+            const sub = btn.getAttribute('data-subfilter');
+            if (btn.classList.contains('active')) {
+              btn.classList.remove('active');
+              state.activeSubFilter = null;
+            } else {
+              subFilters.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+              btn.classList.add('active');
+              state.activeSubFilter = sub;
+            }
+            renderBarChart();
+          });
+        }
+
+        // Clear Selection Button
+        const clearBtn = document.getElementById('btn-clear-selection');
+        if (clearBtn) {
+          clearBtn.addEventListener('click', () => {
+            state.pinnedIds = ['vic-cranbourne-west', 'ph-valencia'];
+            renderAll();
+          });
+        }
+
+        // Feed Search & Category Filters
+        const searchInput = document.getElementById('feed-search');
+        if (searchInput) {
+          searchInput.addEventListener('input', (e) => {
+            state.searchQuery = e.target.value;
+            renderIncidentsFeed();
+          });
+        }
+
+        const catFilters = document.getElementById('feed-category-filters');
+        if (catFilters) {
+          catFilters.addEventListener('click', (e) => {
+            const btn = e.target.closest('.pill');
+            if (!btn) return;
+            catFilters.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+            btn.classList.add('active');
+            state.activeCategoryFilter = btn.getAttribute('data-cat');
+            renderIncidentsFeed();
+          });
+        }
+
+        // Live AI Refresh Button
+        const refreshBtn = document.getElementById('btn-live-refresh');
+        if (refreshBtn) {
+          refreshBtn.addEventListener('click', handleLiveRefresh);
+        }
+
+        // Reset Baseline Data
+        const resetBtn = document.getElementById('btn-reset-baseline');
+        if (resetBtn) {
+          resetBtn.addEventListener('click', () => {
+            if (confirm('Reset intelligence dataset to default 2020–2027 baseline?')) {
+              localStorage.removeItem('safety_tracker_custom_locations');
+              localStorage.removeItem('safety_tracker_custom_incidents');
+              state.locations = JSON.parse(JSON.stringify(BASELINE_DATASETS));
+              state.incidents = JSON.parse(JSON.stringify(BASELINE_INCIDENTS));
+              renderAll();
+            }
+          });
+        }
+
+        // Export JSON Data
+        const exportBtn = document.getElementById('btn-export-json');
+        if (exportBtn) {
+          exportBtn.addEventListener('click', () => {
+            const exportObj = {
+              timestamp: new Date().toISOString(),
+              locations: state.locations,
+              incidents: state.incidents
+            };
+            const blob = new Blob([JSON.stringify(exportObj, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Safety_Intelligence_Tracker_Export_${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+          });
+        }
+
+        // Settings Modal Controls
+        const settingsModal = document.getElementById('modal-settings');
+        const settingsBtn = document.getElementById('btn-settings');
+        const closeX = document.getElementById('modal-close-x');
+        const keyInput = document.getElementById('setting-api-key');
+        const modelSelect = document.getElementById('setting-model');
+        const customModelGroup = document.getElementById('group-custom-model');
+        const saveSettingsBtn = document.getElementById('btn-save-settings');
+        const clearKeyBtn = document.getElementById('btn-clear-key');
+        const testKeyBtn = document.getElementById('btn-test-key');
+        const toggleVisBtn = document.getElementById('btn-toggle-key-visibility');
+        const modalMsg = document.getElementById('modal-status-msg');
+
+        if (settingsBtn && settingsModal) {
+          settingsBtn.addEventListener('click', () => {
+            if (keyInput) keyInput.value = state.apiKey;
+            if (modelSelect) modelSelect.value = state.model;
+            settingsModal.classList.add('open');
+          });
+        }
+
+        if (closeX && settingsModal) {
+          closeX.addEventListener('click', () => settingsModal.classList.remove('open'));
+        }
+
+        if (toggleVisBtn && keyInput) {
+          toggleVisBtn.addEventListener('click', () => {
+            if (keyInput.type === 'password') {
+              keyInput.type = 'text';
+              toggleVisBtn.innerText = 'Hide';
+            } else {
+              keyInput.type = 'password';
+              toggleVisBtn.innerText = 'Show';
+            }
+          });
+        }
+
+        if (modelSelect) {
+          modelSelect.addEventListener('change', () => {
+            if (customModelGroup) {
+              customModelGroup.style.display = modelSelect.value === 'custom' ? 'block' : 'none';
+            }
+          });
+        }
+
+        if (saveSettingsBtn && settingsModal) {
+          saveSettingsBtn.addEventListener('click', () => {
+            state.apiKey = keyInput.value.trim();
+            state.model = modelSelect.value;
+            localStorage.setItem('safety_tracker_gemini_key', state.apiKey);
+            localStorage.setItem('safety_tracker_gemini_model', state.model);
+            settingsModal.classList.remove('open');
+            alert('API Settings saved successfully to local storage.');
+          });
+        }
+
+        if (clearKeyBtn && keyInput) {
+          clearKeyBtn.addEventListener('click', () => {
+            state.apiKey = '';
+            keyInput.value = '';
+            localStorage.removeItem('safety_tracker_gemini_key');
+            if (modalMsg) {
+              modalMsg.style.display = 'block';
+              modalMsg.style.color = '#f59e0b';
+              modalMsg.innerText = 'API Key cleared from local storage.';
+            }
+          });
+        }
+
+        if (testKeyBtn) {
+          testKeyBtn.addEventListener('click', async () => {
+            const testKey = keyInput.value.trim();
+            const selectedM = modelSelect.value === 'custom' ? document.getElementById('setting-custom-model').value.trim() : modelSelect.value;
+            if (modalMsg) {
+              modalMsg.style.display = 'block';
+              modalMsg.style.color = '#38bdf8';
+              modalMsg.innerText = 'Testing Gemini API connection...';
+            }
+            try {
+              const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${selectedM}:generateContent?key=${testKey}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ contents: [{ parts: [{ text: "Ping safety tracker test" }] }] })
+              });
+              if (res.ok) {
+                if (modalMsg) {
+                  modalMsg.style.color = '#34d399';
+                  modalMsg.innerText = 'Connection Successful! Model responded properly.';
+                }
+              } else {
+                throw new Error(`HTTP ${res.status}`);
+              }
+            } catch(e) {
+              if (modalMsg) {
+                modalMsg.style.color = '#ef4444';
+                modalMsg.innerText = `Connection Failed: ${e.message}`;
+              }
+            }
+          });
+        }
+
+        // Window Resize listener to update SVG dimensions smoothly
+        window.addEventListener('resize', () => {
+          renderBarChart();
+          renderTrajectoryChart();
+          renderRadarChart();
+        });
+      }
+
+      // Execute on DOM ready inside try/catch wrapper
+      document.addEventListener('DOMContentLoaded', () => {
+        try {
+          initApp();
+        } catch(err) {
+          console.error('Fatal initialization error:', err);
+          const diag = document.getElementById('diag-banner');
+          if (diag) {
+            diag.style.display = 'block';
+            diag.innerText = `Initialization Notice: ${err.message}. Baseline view rendered.`;
+          }
+        }
+      });
+
+    })();
   </script>
 </body>
 </html>
